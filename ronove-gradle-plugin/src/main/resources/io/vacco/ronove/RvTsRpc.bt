@@ -1,0 +1,54 @@
+/* ================================================================ */
+/* ======== Generated RPC methods - do not modify directly ======== */
+/* ================================================================ */
+
+import {OzReply, RvReq} from "./schema"
+
+const baseHeaders = {"Content-Type": "application/json"}
+
+const onJsonResponse = <T>(response: Response): Promise<OzReply<T>> => {
+  return response.json().then(jData => {
+    if (!response.ok) { throw jData }
+    return jData as OzReply<T>
+  }).catch(error => {
+    const reply: OzReply<any> = error.warnings ? error : {
+      data: undefined, error, message: undefined,
+      warnings: undefined, status: Status.BAD
+    }
+    throw reply
+  })
+}
+
+export const getJson = <T>(url: string): Promise<OzReply<T>> => {
+  return fetch(url).then(response => onJsonResponse(response))
+}
+
+const doRequest = <I, O>(url: string, req: RvReq<I>, init: RequestInit): Promise<OzReply<O>> => {
+  const payload = JSON.stringify(req)
+  const options = {...init, headers: baseHeaders}
+  if (init.method && init.method === "GET") {
+    options.headers = {...options.headers, rvGetBody: payload}
+  } else {
+    options.body = payload
+  }
+  return fetch(url, options).then(response => onJsonResponse(response))
+}
+
+export const doJsonIo = <I, O>(url: string, req: RvReq<I>, method: string): Promise<OzReply<O>> =>
+  doRequest(url, data, d, {method})
+
+/* ====================================== */
+/* ======== Start of RPC methods ======== */
+/* ====================================== */
+
+export class RvExampleApi {
+  public OzReply<string[]>
+}
+
+  @RvOp(path = "/v1/blog/tags", method = RvMethod.Get)
+  public OzReply<String[]> getBlogPostTags(RvReq<Long> blogIdReq) {
+    return OzReply.asOk(new String[] {"cooking", "cats", "latest"});
+  }
+
+export const v1ProjectValidate = (p: FlProject): Promise<OzReply<FlRunContext[]>> =>
+  doRequest(FlRouteVal.V1_PROJECT_VALIDATE, p)
