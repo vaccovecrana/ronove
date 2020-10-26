@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.core;
 
 public enum RvMethod {
   Get, Post, Put,
