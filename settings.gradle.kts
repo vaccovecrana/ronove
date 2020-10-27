@@ -5,4 +5,4 @@ pluginManagement {
   }
 }
 
-include("ronove-backend", "ronove-gradle-plugin")
+include("ronove-backend", "io.vacco.ronove.gradle.plugin")
