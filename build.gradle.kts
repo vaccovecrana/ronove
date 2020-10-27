@@ -9,8 +9,8 @@ subprojects {
     addJ8Spec()
     addPmd()
     addSpotBugs()
-    sharedLibrary()
     setPublishingUrlTransform { repo -> "${repo.url}/${rootProject.name}" }
+    sharedLibrary()
   }
 
   configure<JavaPluginExtension> {
