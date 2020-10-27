@@ -10,7 +10,6 @@ subprojects {
     addPmd()
     addSpotBugs()
     setPublishingUrlTransform { repo -> "${repo.url}/${rootProject.name}" }
-    sharedLibrary()
   }
 
   configure<JavaPluginExtension> {

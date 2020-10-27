@@ -1,11 +1,13 @@
-plugins { `java-gradle-plugin` }
+plugins { `maven-publish`; `java-gradle-plugin` }
 
 repositories { gradlePluginPortal() }
 
 gradlePlugin {
   plugins {
-    create("simplePlugin") {
-      id = "io.vacco.ronove-gradle-plugin"
+    create("ronovePlugin") {
+      id = "io.vacco.ronove"
+      displayName = "Ronove"
+      description = "Typescript frontend client generator."
       implementationClass = "io.vacco.ronove.RvPlugin"
     }
   }
