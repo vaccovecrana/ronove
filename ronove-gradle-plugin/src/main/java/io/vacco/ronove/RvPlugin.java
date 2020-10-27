@@ -1,6 +1,7 @@
 package io.vacco.ronove;
 
-import cz.habarta.typescript.generator.gradle.TypeScriptGeneratorPlugin;
+import cz.habarta.typescript.generator.*;
+import cz.habarta.typescript.generator.gradle.*;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -12,5 +13,16 @@ public class RvPlugin implements Plugin<Project> {
     project.getExtensions().create("ronove", RvPluginExtension.class);
     project.getTasks().create("rvTypescriptRpc", RvTask.class);
     project.getPlugins().apply(TypeScriptGeneratorPlugin.class);
+
+    project.getTasks().withType(GenerateTask.class).configureEach(gt -> {
+      Jackson2Configuration j2 = new Jackson2Configuration();
+      j2.enumsUsingToString = true;
+
+      gt.jsonLibrary = JsonLibrary.jackson2;
+      gt.jackson2Configuration = j2;
+      gt.mapEnum = EnumMapping.asEnum;
+      gt.outputFileType = TypeScriptFileType.implementationFile;
+      gt.outputKind = TypeScriptOutputKind.module;
+    });
   }
 }
