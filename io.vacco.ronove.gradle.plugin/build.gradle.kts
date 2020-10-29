@@ -7,3 +7,12 @@ dependencies {
   implementation("io.marioslab.basis:template:1.7")
   implementation("io.vacco.oruzka:oruzka:0.1.0")
 }
+
+val versionNum = tasks.register("versionNumber") {
+  doLast {
+    File(project.buildDir, "resources/main/io/vacco/ronove/version")
+        .writeText(project.version.toString())
+  }
+}
+
+tasks.withType<Jar> { dependsOn(versionNum) }
