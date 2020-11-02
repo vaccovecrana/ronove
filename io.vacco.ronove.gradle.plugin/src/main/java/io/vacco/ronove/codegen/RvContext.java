@@ -7,6 +7,7 @@ import org.gradle.api.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RvContext {
 
@@ -18,9 +19,9 @@ public class RvContext {
   public Map<String, RvDescriptor> contextFor(List<Class<?>> controllers) {
     for (Class<?> ct : controllers) {
       for (Method m : ct.getMethods()) {
-        log.warn(m.toString());
         for (Annotation an : m.getAnnotations()) {
           if (RvOp.class.isAssignableFrom(an.getClass())) {
+            log.warn("Method: {}", m);
             RvDescriptor rd = df.describe(m);
             String path = rd.opMetadata.path();
             if (paths.containsKey(path)) {
@@ -39,6 +40,7 @@ public class RvContext {
     TemplateContext context = new TemplateContext();
     TemplateLoader loader = new TemplateLoader.ClasspathTemplateLoader();
     Template template = loader.load("/io/vacco/ronove/codegen/rv-ts-rpc.bt");
+    context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
     context.set("rvDescriptors", contextFor(controllers).values());
     context.set("tsSchemaTypes", String.join(", ", df.tsSchemaTypes));
     return template.render(context);

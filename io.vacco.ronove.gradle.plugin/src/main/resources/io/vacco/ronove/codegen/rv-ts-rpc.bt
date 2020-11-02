@@ -1,6 +1,7 @@
-/* ================================================================ */
-/* ======== Generated RPC methods - do not modify directly ======== */
-/* ================================================================ */
+/* ========================================================= */
+/* ======== Generated file - do not modify directly ======== */
+/* ========================================================= */
+
 import {
   {{tsSchemaTypes}}
 } from "./schema"
@@ -26,6 +27,13 @@ export const doJsonIo = <I, O>(url: string, req: I, method: string): Promise<O> 
 /* ====================================== */
 /* ======== Start of RPC methods ======== */
 /* ====================================== */
+
+/*
+Source controllers:
+{{for ctl in rvControllers}}
+- {{ctl}}
+{{end}}
+ */
 {{for rvd in rvDescriptors}}
 export const {{rvd.opMethod.getName()}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.tsOutputType}}> =>
   doJsonIo("{{rvd.opMetadata.path()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.opMetadata.method().toString()}}")
