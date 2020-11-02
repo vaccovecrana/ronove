@@ -10,8 +10,7 @@ dependencies {
 
 val versionNum = tasks.register("versionNumber") {
   doLast {
-    File(project.buildDir, "resources/main/io/vacco/ronove/version")
-        .writeText(project.version.toString())
+    File(project.buildDir, "resources/main/io/vacco/ronove/version").writeText(project.version.toString())
   }
 }
 

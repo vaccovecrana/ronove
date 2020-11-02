@@ -9,9 +9,9 @@ const baseHeaders = {"Content-Type": "application/json"}
 
 const doRequest = <I, O>(url: string, req: I, init: RequestInit): Promise<O> => {
   const payload = JSON.stringify(req)
-  const options = {...init, headers: baseHeaders}
+  const options: any = {...init, headers: baseHeaders}
   if (init.method && init.method === "Get") {
-    options.headers = {...options.headers, rvGetBody: payload}
+    options.headers.rvGetBody =  payload
   } else {
     options.body = payload
   }
@@ -27,6 +27,6 @@ export const doJsonIo = <I, O>(url: string, req: I, method: string): Promise<O> 
 /* ======== Start of RPC methods ======== */
 /* ====================================== */
 {{for rvd in rvDescriptors}}
-export const {{rvd.opMethod.getName()}} = (in: {{rvd.tsInputType}}): Promise<{{rvd.tsOutputType}}> =>
-  doJsonIo("{{rvd.opMetadata.path()}}", in, "{{rvd.opMetadata.method().toString()}}")
+export const {{rvd.opMethod.getName()}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.tsOutputType}}> =>
+  doJsonIo("{{rvd.opMetadata.path()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.opMetadata.method().toString()}}")
 {{end}}

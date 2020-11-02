@@ -5,7 +5,6 @@ import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.*;
-
 import java.util.Collections;
 
 import static j8spec.J8Spec.*;
