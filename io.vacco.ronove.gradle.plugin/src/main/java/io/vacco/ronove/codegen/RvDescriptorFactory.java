@@ -99,7 +99,8 @@ public class RvDescriptorFactory {
     d.opMethod = m;
     d.tsOutputType = tsArgsOf((ParameterizedType) m.getGenericReturnType());
     if (m.getParameters().length == 1) {
-      d.tsInputType = tsArgsOf((ParameterizedType) m.getParameters()[0].getParameterizedType());
+      Type t = m.getParameters()[0].getParameterizedType();
+      d.tsInputType = t instanceof ParameterizedType ? tsArgsOf((ParameterizedType) t) : tsTypeOf(t);
     }
     return d;
   }

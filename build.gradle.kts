@@ -3,7 +3,7 @@ plugins { id("io.vacco.common-build") version "0.5.3" }
 subprojects {
   apply(plugin = "io.vacco.common-build")
   group = "io.vacco.ronove"
-  version = "0.1.1"
+  version = "0.1.2"
 
   configure<io.vacco.common.CbPluginProfileExtension> {
     addJ8Spec()

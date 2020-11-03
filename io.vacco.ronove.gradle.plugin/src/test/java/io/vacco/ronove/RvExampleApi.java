@@ -7,6 +7,11 @@ import java.util.*;
 
 public class RvExampleApi {
 
+  @RvOp(path = "/v1/api/echo", method = RvMethod.Get)
+  public OzReply<Integer> getSomEchoFn(RvIntRequest req) {
+    return OzReply.asOk(0);
+  }
+
   @RvOp(path = "/v1/api/options", method = RvMethod.Get)
   public OzReply<List<RvApiOpts>> getApiOpts() {
     return OzReply.asOk(Arrays.asList(RvApiOpts.values()));
