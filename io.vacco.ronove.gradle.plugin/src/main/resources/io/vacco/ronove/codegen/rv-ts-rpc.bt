@@ -12,7 +12,7 @@ const doRequest = <I, O>(url: string, req: I, init: RequestInit): Promise<O> => 
   const payload = JSON.stringify(req)
   const options: any = {...init, headers: baseHeaders}
   if (init.method && init.method === "Get") {
-    options.headers.rvGetBody =  payload
+    options.headers["Rv-Get-Body"] =  payload
   } else {
     options.body = payload
   }
