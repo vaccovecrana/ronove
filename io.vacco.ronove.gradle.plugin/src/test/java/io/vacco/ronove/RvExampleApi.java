@@ -3,21 +3,22 @@ package io.vacco.ronove;
 import io.vacco.oruzka.core.OzReply;
 import io.vacco.ronove.core.*;
 
+import javax.ws.rs.*;
 import java.util.*;
 
 public class RvExampleApi {
 
-  @RvOp(path = "/v1/api/echo", method = RvMethod.Get)
+  @GET @Path("/v1/api/echo")
   public OzReply<Integer> getSomEchoFn(RvIntRequest req) {
     return OzReply.asOk(0);
   }
 
-  @RvOp(path = "/v1/api/options", method = RvMethod.Get)
+  @GET @Path("/v1/api/options")
   public OzReply<List<RvApiOpts>> getApiOpts() {
     return OzReply.asOk(Arrays.asList(RvApiOpts.values()));
   }
 
-  @RvOp(path = "/v1/blog/options", method = RvMethod.Get)
+  @GET @Path("/v1/blog/options")
   public OzReply<List<RvBlogEntry>> getBlogsWithOption(RvReq<RvApiOpts> anOption) {
     RvBlogEntry e0 = new RvBlogEntry();
     e0.bid = 111L;
@@ -32,7 +33,7 @@ public class RvExampleApi {
     return OzReply.asOk(Arrays.asList(e0, e1));
   }
 
-  @RvOp(path = "/v1/blog", method = RvMethod.Get)
+  @GET @Path("/v1/blog")
   public OzReply<RvBlogEntry> getBlogPost(RvReq<Long> blogId) {
     RvBlogEntry e = new RvBlogEntry();
     e.bid = 999L;
@@ -41,12 +42,12 @@ public class RvExampleApi {
     return OzReply.asOk(e);
   }
 
-  @RvOp(path = "/v1/blog/tags", method = RvMethod.Get)
+  @GET @Path("/v1/blog/tags")
   public OzReply<String[]> getBlogPostTags(RvReq<List<Long>> blogIds) {
     return OzReply.asOk(new String[] {"cooking", "cats", "latest"});
   }
 
-  @RvOp(path = "/v1/blog/tags/update", method = RvMethod.Patch)
+  @PATCH @Path("/v1/blog/tags/update")
   public OzReply<Long[]> patchBlogTags(RvReq<List<RvBlogTagsUpdate>> blogUpdates) {
     return OzReply.asOk(new Long[] {111L, 222L, 333L});
   }

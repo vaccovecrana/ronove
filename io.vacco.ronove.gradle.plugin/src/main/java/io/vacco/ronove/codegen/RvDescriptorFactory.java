@@ -92,16 +92,4 @@ public class RvDescriptorFactory {
     );
   }
 
-  public RvDescriptor describe(Method m) {
-    RvOp r = m.getAnnotation(RvOp.class);
-    RvDescriptor d = new RvDescriptor();
-    d.opMetadata = r;
-    d.opMethod = m;
-    d.tsOutputType = tsArgsOf((ParameterizedType) m.getGenericReturnType());
-    if (m.getParameters().length == 1) {
-      Type t = m.getParameters()[0].getParameterizedType();
-      d.tsInputType = t instanceof ParameterizedType ? tsArgsOf((ParameterizedType) t) : tsTypeOf(t);
-    }
-    return d;
-  }
 }

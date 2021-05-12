@@ -36,5 +36,5 @@ Source controllers:
  */
 {{for rvd in rvDescriptors}}
 export const {{rvd.opMethod.getName()}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.tsOutputType}}> =>
-  doJsonIo("{{rvd.opMetadata.path()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.opMetadata.method().toString()}}")
+  doJsonIo("{{rvd.path.value()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.httpMethod}}")
 {{end}}
