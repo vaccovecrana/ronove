@@ -25,4 +25,5 @@ public class RvPlugin implements Plugin<Project> {
       gt.outputKind = TypeScriptOutputKind.module;
     });
   }
+
 }

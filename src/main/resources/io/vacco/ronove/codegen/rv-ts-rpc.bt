@@ -8,11 +8,14 @@ import {
 
 const baseHeaders = {"Content-Type": "application/json"}
 
-const doRequest = <I, O>(url: string, req: I, init: RequestInit): Promise<O> => {
+const doRequest = <I, O>(url: string, req: I, method: string, // TODO <-- change req to BeanParam
+                         pathParams: Map<string, string>,
+                         queryParams: Map<string, string>,
+                         headerParams: Map<string, string>): Promise<O> => {
   const payload = JSON.stringify(req)
-  const options: any = {...init, headers: baseHeaders}
+  const options: any = {...init, method, headers: baseHeaders}
   if (init.method && init.method === "Get") {
-    options.headers["Rv-Get-Body"] =  payload
+    options.headers["Rv-Get-Body"] = payload
   } else {
     options.body = payload
   }
@@ -35,6 +38,6 @@ Source controllers:
 {{end}}
  */
 {{for rvd in rvDescriptors}}
-export const {{rvd.opMethod.getName()}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.tsOutputType}}> =>
+export const {{rvd.httpMethodTxt}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.responseTsType}}> =>
   doJsonIo("{{rvd.path.value()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.httpMethod}}")
 {{end}}

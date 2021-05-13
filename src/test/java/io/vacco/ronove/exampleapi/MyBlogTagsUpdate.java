@@ -1,8 +1,8 @@
-package io.vacco.ronove;
+package io.vacco.ronove.exampleapi;
 
 import java.util.Set;
 
-public class RvBlogTagsUpdate {
+public class MyBlogTagsUpdate {
   public long blogId;
   public Set<String> tags;
 }

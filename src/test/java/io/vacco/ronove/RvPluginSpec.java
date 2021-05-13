@@ -1,6 +1,7 @@
 package io.vacco.ronove;
 
 import io.vacco.ronove.codegen.RvContext;
+import io.vacco.ronove.exampleapi.MyApi;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ public class RvPluginSpec {
   static {
     describe(RvPlugin.class.getCanonicalName(),
         () -> it("can read service endpoint methods from annotated classes",
-            () -> log.warn(new RvContext().map(Collections.singletonList(RvExampleApi.class)))));
+            () -> log.warn(new RvContext().render(Collections.singletonList(MyApi.class)))));
   }
+
 }

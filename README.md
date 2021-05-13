@@ -8,6 +8,11 @@ It provides:
 - Typescript RPC stubs through [typescript-generator-gradle-plugin](https://github.com/vojtechhabarta/typescript-generator).
 - Supplemental annotations for web controller method definitions.
 
+Opinionated choices:
+
+- Query parameters only support single key/value definitions.
+- Things like list query parameters in `GET` request are best sent as header parameters.
+
 TODO
 
 - Describe controller definition annotations.

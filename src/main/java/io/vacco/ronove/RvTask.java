@@ -33,7 +33,7 @@ public class RvTask extends DefaultTask {
           .overrideClassLoaders(ucl);
       String tsSrc;
       try (ScanResult scanResult = cg.scan()) {
-        tsSrc = ctx.map(scanResult.getAllClasses().loadClasses());
+        tsSrc = ctx.render(scanResult.getAllClasses().loadClasses());
       }
       Files.write(ext.outFile.get().getAsFile().toPath(), tsSrc.getBytes(StandardCharsets.UTF_8));
     }

@@ -1,30 +1,31 @@
-package io.vacco.ronove;
+package io.vacco.ronove.exampleapi;
 
 import io.vacco.oruzka.core.OzReply;
 
 import javax.ws.rs.*;
 import java.util.*;
 
-public class RvExampleApi {
+public class MyApi {
 
-  @GET @Path("/v1/api/echo")
-  public OzReply<Integer> getSomEchoFn(int req) {
+  @GET @Path("/v1/api/echo/{number}")
+  public OzReply<Integer> getSomEchoFn(@PathParam("someNumber") int someNumber) {
     return OzReply.asOk(0);
   }
 
   @GET @Path("/v1/api/options")
-  public OzReply<List<RvApiOpts>> getApiOpts() {
-    return OzReply.asOk(Arrays.asList(RvApiOpts.values()));
+  public OzReply<List<MyOpts>> getApiOpts() {
+    return OzReply.asOk(Arrays.asList(MyOpts.values()));
   }
 
   @GET @Path("/v1/blog/options")
-  public OzReply<List<RvBlogEntry>> getBlogsWithOption(RvApiOpts anOption) {
-    RvBlogEntry e0 = new RvBlogEntry();
+  public OzReply<List<MyBlogEntry>> getBlogsByOption(@QueryParam("anOption") MyOpts anOption,
+                                                     @QueryParam("sortAsc") @DefaultValue("asc") String sort) {
+    MyBlogEntry e0 = new MyBlogEntry();
     e0.bid = 111L;
     e0.text = "This is some blog content text";
     e0.tags = new LinkedHashSet<>(Arrays.asList("food", "travel", "money"));
 
-    RvBlogEntry e1 = new RvBlogEntry();
+    MyBlogEntry e1 = new MyBlogEntry();
     e1.bid = 888L;
     e1.text = "And this is some other blog content text";
     e1.tags = new LinkedHashSet<>(Arrays.asList("cats", "dogs", "funny"));
@@ -33,8 +34,8 @@ public class RvExampleApi {
   }
 
   @GET @Path("/v1/blog")
-  public OzReply<RvBlogEntry> getBlogPost(long blogId) {
-    RvBlogEntry e = new RvBlogEntry();
+  public OzReply<MyBlogEntry> getBlogPost(@QueryParam("blogId") long blogId) {
+    MyBlogEntry e = new MyBlogEntry();
     e.bid = 999L;
     e.text = "This is some blog content text";
     e.tags = new LinkedHashSet<>(Arrays.asList("food", "travel", "money"));
@@ -42,12 +43,12 @@ public class RvExampleApi {
   }
 
   @GET @Path("/v1/blog/tags")
-  public OzReply<String[]> getBlogPostTags(List<Long> blogIds) {
+  public OzReply<String[]> getBlogPostTags(@HeaderParam("blogIds") List<Long> blogIds) {
     return OzReply.asOk(new String[] {"cooking", "cats", "latest"});
   }
 
   @PATCH @Path("/v1/blog/tags/update")
-  public OzReply<Long[]> patchBlogTags(List<RvBlogTagsUpdate> blogUpdates) {
+  public OzReply<Long[]> patchBlogTags(@BeanParam List<MyBlogTagsUpdate> blogUpdates) {
     return OzReply.asOk(new Long[] {111L, 222L, 333L});
   }
 
