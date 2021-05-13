@@ -1,7 +1,6 @@
 package io.vacco.ronove.codegen;
 
 import io.marioslab.basis.template.*;
-import io.vacco.ronove.core.*;
 import org.gradle.api.logging.*;
 
 import javax.ws.rs.*;

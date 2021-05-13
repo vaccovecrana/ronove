@@ -1,8 +1,3 @@
-pluginManagement {
-  repositories {
-    jcenter(); gradlePluginPortal()
-    maven { name = "VaccoOss"; setUrl("https://dl.bintray.com/vaccovecrana/vacco-oss") }
-  }
-}
+pluginManagement { repositories { mavenCentral(); gradlePluginPortal() } }
 
-include("ronove-backend", "io.vacco.ronove.gradle.plugin")
+rootProject.name = "io.vacco.ronove.gradle.plugin"

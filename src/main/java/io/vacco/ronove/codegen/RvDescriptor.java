@@ -1,4 +1,4 @@
-package io.vacco.ronove.core;
+package io.vacco.ronove.codegen;
 
 import javax.ws.rs.Path;
 import java.lang.reflect.Method;

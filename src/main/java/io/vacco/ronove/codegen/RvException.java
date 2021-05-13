@@ -1,10 +1,11 @@
 package io.vacco.ronove.codegen;
 
-import io.vacco.ronove.core.RvDescriptor;
-
 public class RvException {
 
   public static class RvDuplicateMappingException extends RuntimeException {
+
+    public static final long serialVersionUID = 1;
+
     public final String path;
     public final RvDescriptor newDesc, oldDesc;
     public RvDuplicateMappingException(String path, RvDescriptor newDesc, RvDescriptor oldDesc) {
