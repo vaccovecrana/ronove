@@ -39,5 +39,9 @@ Source controllers:
  */
 {{for rvd in rvDescriptors}}
 export const {{rvd.httpMethodTxt}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.responseTsType}}> =>
+  // TODO --> path params: as is
+  // TODO --> query params: URL encode
+  // TODO --> header params: JSON stringify
+  // TODO server side adapters need to de-serialize in the same format.
   doJsonIo("{{rvd.path.value()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.httpMethod}}")
 {{end}}

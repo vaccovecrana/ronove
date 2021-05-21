@@ -12,7 +12,7 @@ public class RvDescriptor {
   public String httpMethodTxt;
   public Path path;
   public String responseTsType;
-  public List<RvParameter> parameters = new ArrayList<>();
+  public List<RvParameter> parameters = new ArrayList<>(); // TODO split this into maps.
 
   @Override public String toString() {
     return String.format("(%s) %s (%s) -> %s", httpMethodTxt, path, parameters.size(), responseTsType);
