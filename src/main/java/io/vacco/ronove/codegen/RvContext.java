@@ -42,11 +42,25 @@ public class RvContext {
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@javax.ws.rs.", "").replace("()", "");
     d.responseTsType = df.tsArgsOf((ParameterizedType) m.getGenericReturnType());
-    d.parameters = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
 
-    Optional<RvParameter> bodyParam = d.parameters.stream().filter(pr -> isJaxRsBodyParam(pr.paramType)).findFirst();
-    if (isNonBodyJaxRsMethod(d.httpMethod) && bodyParam.isPresent()) {
-      throw new IllegalStateException(String.format("%s cannot define body parameter %s", bodyParam));
+    Map<String, List<RvParameter>> parmIdx = Arrays.stream(m.getParameters())
+        .map(this::describe).collect(Collectors.groupingBy(prm -> prm.paramType.annotationType().getSimpleName()));
+
+    if (parmIdx.get(BeanParam.class.getSimpleName()) != null) {
+      d.beanParam = parmIdx.get(BeanParam.class.getSimpleName()).get(0);
+    }
+    if (parmIdx.get(QueryParam.class.getSimpleName()) != null) {
+      d.queryParams = parmIdx.get(QueryParam.class.getSimpleName());
+    }
+    if (parmIdx.get(HeaderParam.class.getSimpleName()) != null) {
+      d.headerParams = parmIdx.get(HeaderParam.class.getSimpleName());
+    }
+    if (parmIdx.get(PathParam.class.getSimpleName()) != null) {
+      d.pathParams = parmIdx.get(PathParam.class.getSimpleName());
+    }
+
+    if (isNonBodyJaxRsMethod(d.httpMethod) && d.beanParam != null) {
+      throw new IllegalStateException(String.format("Method %s cannot define body (bean) parameter %s", m, d.beanParam));
     }
 
     return d;

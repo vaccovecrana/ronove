@@ -12,9 +12,13 @@ public class RvDescriptor {
   public String httpMethodTxt;
   public Path path;
   public String responseTsType;
-  public List<RvParameter> parameters = new ArrayList<>(); // TODO split this into maps.
+
+  public RvParameter beanParam;
+  public List<RvParameter> queryParams = new ArrayList<>();
+  public List<RvParameter> headerParams = new ArrayList<>();
+  public List<RvParameter> pathParams = new ArrayList<>();
 
   @Override public String toString() {
-    return String.format("(%s) %s (%s) -> %s", httpMethodTxt, path, parameters.size(), responseTsType);
+    return String.format("(%s) %s -> %s", httpMethodTxt, path, responseTsType);
   }
 }

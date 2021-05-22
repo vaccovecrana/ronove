@@ -10,4 +10,11 @@ public class RvParameter {
   public Type type;
   public Annotation paramType;
 
+  @Override public String toString() {
+    return String.format(
+        "(%s) %s: %s",
+        paramType != null ? paramType.annotationType().getSimpleName() : "?",
+        name, tsType
+    );
+  }
 }
