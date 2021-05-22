@@ -7,7 +7,7 @@ import java.util.*;
 
 public class MyApi {
 
-  @GET @Path("/v1/api/echo/{number}")
+  @GET @Path("/v1/api/echo/{someNumber}")
   public OzReply<Integer> getSomEchoFn(@PathParam("someNumber") int someNumber) {
     return OzReply.asOk(0);
   }

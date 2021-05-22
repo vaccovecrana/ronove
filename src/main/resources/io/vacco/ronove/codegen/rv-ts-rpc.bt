@@ -13,9 +13,7 @@ const doJsonIo = <I, O>(url: string, method: string, body: I,
     options.headers["Content-Type"] = "application/json"
     options.body = JSON.stringify(body)
   }
-  if (headers) {
-    headers.forEach((v, k) => options.headers[k] = v)
-  }
+  headers.forEach((v, k) => options.headers[k] = v)
   return fetch(url, options)
     .then(response => response.json())
     .then(jData => Promise.resolve(jData as O))

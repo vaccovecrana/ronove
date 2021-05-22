@@ -61,6 +61,14 @@ public class RvContext {
     }
     if (parmIdx.get(PathParam.class.getSimpleName()) != null) {
       d.pathParams = parmIdx.get(PathParam.class.getSimpleName());
+      d.pathParams.forEach(pp -> {
+        if (!d.path.value().contains(pp.name)) {
+          throw new IllegalArgumentException(format(
+              "Path parameter definition [%s] not found in controller path [%s]. Ensure parameter names match.",
+              pp.name, d.path.value()
+          ));
+        }
+      });
     }
     if (isNonBodyJaxRsMethod(d.httpMethod) && d.beanParam != null) {
       throw new IllegalStateException(String.format("Method %s cannot define body (bean) parameter %s", m, d.beanParam));
