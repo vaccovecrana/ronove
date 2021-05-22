@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vacco.ronove.codegen.RvAnnotations.*;
+import static java.lang.String.format;
 
 public class RvContext {
 
@@ -42,9 +43,12 @@ public class RvContext {
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@javax.ws.rs.", "").replace("()", "");
     d.responseTsType = df.tsArgsOf((ParameterizedType) m.getGenericReturnType());
+    d.allParams = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
+    d.paramsTsList = d.allParams.stream()
+        .map(prm -> format("%s: %s", prm.name != null ? prm.name : "body", prm.tsType))
+        .collect(Collectors.joining(", "));
 
-    Map<String, List<RvParameter>> parmIdx = Arrays.stream(m.getParameters())
-        .map(this::describe).collect(Collectors.groupingBy(prm -> prm.paramType.annotationType().getSimpleName()));
+    Map<String, List<RvParameter>> parmIdx = d.allParams.stream().collect(Collectors.groupingBy(prm -> prm.paramType.annotationType().getSimpleName()));
 
     if (parmIdx.get(BeanParam.class.getSimpleName()) != null) {
       d.beanParam = parmIdx.get(BeanParam.class.getSimpleName()).get(0);
@@ -58,7 +62,6 @@ public class RvContext {
     if (parmIdx.get(PathParam.class.getSimpleName()) != null) {
       d.pathParams = parmIdx.get(PathParam.class.getSimpleName());
     }
-
     if (isNonBodyJaxRsMethod(d.httpMethod) && d.beanParam != null) {
       throw new IllegalStateException(String.format("Method %s cannot define body (bean) parameter %s", m, d.beanParam));
     }

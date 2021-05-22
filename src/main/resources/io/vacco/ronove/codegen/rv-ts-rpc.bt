@@ -6,26 +6,20 @@ import {
   {{tsSchemaTypes}}
 } from "./schema"
 
-const baseHeaders = {"Content-Type": "application/json"}
-
-const doRequest = <I, O>(url: string, req: I, method: string, // TODO <-- change req to BeanParam
-                         pathParams: Map<string, string>,
-                         queryParams: Map<string, string>,
-                         headerParams: Map<string, string>): Promise<O> => {
-  const payload = JSON.stringify(req)
-  const options: any = {...init, method, headers: baseHeaders}
-  if (init.method && init.method === "Get") {
-    options.headers["Rv-Get-Body"] = payload
-  } else {
-    options.body = payload
+const doJsonIo = <I, O>(url: string, method: string, body: I,
+                        headers: Map<string, string>): Promise<O> => {
+  const options: any = {method, headers: {}}
+  if (body) {
+    options.headers["Content-Type"] = "application/json"
+    options.body = JSON.stringify(body)
+  }
+  if (headers) {
+    headers.forEach((v, k) => options.headers[k] = v)
   }
   return fetch(url, options)
     .then(response => response.json())
     .then(jData => Promise.resolve(jData as O))
 }
-
-export const doJsonIo = <I, O>(url: string, req: I, method: string): Promise<O> =>
-  doRequest(url, req, {method})
 
 /* ====================================== */
 /* ======== Start of RPC methods ======== */
@@ -33,15 +27,22 @@ export const doJsonIo = <I, O>(url: string, req: I, method: string): Promise<O> 
 
 /*
 Source controllers:
-{{for ctl in rvControllers}}
-- {{ctl}}
-{{end}}
+
+{{for ctl in rvControllers}}- {{ctl}}{{"\n"}}{{end}}
  */
 {{for rvd in rvDescriptors}}
-export const {{rvd.httpMethodTxt}} = ({{if rvd.tsInputType != null}}req: {{rvd.tsInputType}}{{end}}): Promise<{{rvd.responseTsType}}> =>
-  // TODO --> path params: as is
-  // TODO --> query params: URL encode
-  // TODO --> header params: JSON stringify
-  // TODO server side adapters need to de-serialize in the same format.
-  doJsonIo("{{rvd.path.value()}}", {{if rvd.tsInputType != null}}req{{else}}{}{{end}}, "{{rvd.httpMethod}}")
+export const {{rvd.handler.getName()}} = ({{rvd.paramsTsList}}): Promise<{{rvd.responseTsType}}> => {
+  let path = "{{rvd.path.value()}}"
+  {{for pp in rvd.pathParams}}path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}{{end}}
+  {{if !rvd.queryParams.isEmpty()}}
+  const qParams = new URLSearchParams()
+  {{for qp in rvd.queryParams}}qParams.append("{{qp.name}}", {{qp.name}}.toString()){{"\n  "}}{{end}}
+  path = `${path}?${qParams.toString()}`
+  {{end}}
+  {{if !rvd.headerParams.isEmpty()}}
+  const headers = new Map<string, string>()
+  {{for hp in rvd.headerParams}}headers.set("{{hp.name}}", {{if hp.tsType.equals("string")}}{{hp.name}}{{else}}JSON.stringify({{hp.name}}){{end}}){{"\n  "}}{{end}}
+  {{end}}
+  return doJsonIo(path, "{{rvd.httpMethodTxt}}", {{if rvd.beanParam != null}}body{{else}}undefined{{end}}, {{if !rvd.headerParams.isEmpty()}}headers{{else}}new Map(){{end}})
+}
 {{end}}
