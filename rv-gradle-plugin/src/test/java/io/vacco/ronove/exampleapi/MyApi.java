@@ -1,8 +1,8 @@
 package io.vacco.ronove.exampleapi;
 
 import io.vacco.oruzka.core.OzReply;
+import jakarta.ws.rs.*;
 
-import javax.ws.rs.*;
 import java.util.*;
 
 public class MyApi {

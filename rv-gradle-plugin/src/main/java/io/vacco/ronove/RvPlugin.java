@@ -10,8 +10,7 @@ public class RvPlugin implements Plugin<Project> {
   public static final String implementation = "implementation";
 
   @Override public void apply(Project project) {
-    project.getDependencies().add(implementation, "org.codejargon.feather:feather:1.0");
-    project.getDependencies().add(implementation, "io.swagger.core.v3:swagger-annotations:2.1.9");
+    // project.getDependencies().add(implementation, "javax.ws.rs:javax.ws.rs-api:2.1.1");
     project.getExtensions().create("ronove", RvPluginExtension.class, project);
     project.getTasks().create("ronoveTypescriptRpc", RvTask.class);
     project.getPlugins().apply(TypeScriptGeneratorPlugin.class);

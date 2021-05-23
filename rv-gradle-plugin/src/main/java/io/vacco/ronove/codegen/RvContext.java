@@ -4,7 +4,7 @@ import io.marioslab.basis.template.*;
 import io.vacco.oruzka.core.OFnSupplier;
 import org.gradle.api.logging.*;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -41,7 +41,7 @@ public class RvContext {
     d.path = p;
     d.handler = m;
     d.httpMethod = jaxRsMethod;
-    d.httpMethodTxt = jaxRsMethod.toString().replace("@javax.ws.rs.", "").replace("()", "");
+    d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
     d.responseTsType = df.tsArgsOf((ParameterizedType) m.getGenericReturnType());
     d.allParams = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
     d.paramsTsList = d.allParams.stream()

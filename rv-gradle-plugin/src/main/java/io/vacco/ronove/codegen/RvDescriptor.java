@@ -1,6 +1,6 @@
 package io.vacco.ronove.codegen;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;

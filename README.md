@@ -4,7 +4,6 @@
 
 It provides:
 
-- [feather](https://github.com/zsoltherpai/feather) as a configuration loading and application mechanism.
 - Typescript RPC stubs through [typescript-generator-gradle-plugin](https://github.com/vojtechhabarta/typescript-generator).
 - Supplemental annotations for web controller method definitions.
 
