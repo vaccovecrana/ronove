@@ -1,3 +1,5 @@
 pluginManagement { repositories { mavenCentral(); gradlePluginPortal() } }
 
-rootProject.name = "io.vacco.ronove.gradle.plugin"
+include("rv-gradle-plugin", "rv-kit-undertow")
+
+project(":rv-gradle-plugin").name = "io.vacco.ronove.gradle.plugin"
