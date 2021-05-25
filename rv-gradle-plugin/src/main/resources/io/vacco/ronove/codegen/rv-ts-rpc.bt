@@ -1,11 +1,11 @@
 /* ========================================================= */
 /* ======== Generated file - do not modify directly ======== */
 /* ========================================================= */
-
+{{if tsSchemaTypes.length() > 0}}
 import {
   {{tsSchemaTypes}}
 } from "./schema"
-
+{{end}}
 const doJsonIo = <I, O>(url: string, method: string, body: I,
                         headers: Map<string, string>): Promise<O> => {
   const options: any = {method, headers: {}}

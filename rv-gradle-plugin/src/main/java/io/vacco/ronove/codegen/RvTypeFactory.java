@@ -90,4 +90,9 @@ public class RvTypeFactory {
     );
   }
 
+  public String tsReturnTypeOf(Method m) {
+    Type mgrt = m.getGenericReturnType();
+    return mgrt instanceof ParameterizedType ? tsArgsOf((ParameterizedType) mgrt) : tsTypeOf(mgrt);
+  }
+
 }

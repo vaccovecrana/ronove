@@ -42,7 +42,7 @@ public class RvContext {
     d.handler = m;
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
-    d.responseTsType = df.tsArgsOf((ParameterizedType) m.getGenericReturnType());
+    d.responseTsType = df.tsReturnTypeOf(m);
     d.allParams = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
     d.paramsTsList = d.allParams.stream()
         .map(prm -> format("%s: %s", prm.name != null ? prm.name : "body", prm.tsType))
@@ -105,6 +105,7 @@ public class RvContext {
     context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
     context.set("rvDescriptors", ctx.values());
     context.set("tsSchemaTypes", String.join(", ", df.tsSchemaTypes));
+
     return template.render(context);
   }
 
