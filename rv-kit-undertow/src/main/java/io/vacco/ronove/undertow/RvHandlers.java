@@ -44,30 +44,6 @@ public class RvHandlers {
     asJson(gson, ex, forResponse.get(), StatusCodes.NOT_FOUND);
   }
 
-  public static int pathParamInt(HttpServerExchange ex, String key) {
-    return Integer.parseInt(ex.getPathParameters().get(key).getFirst());
-  }
-
-  public static long pathParamLong(HttpServerExchange ex, String key) {
-    return Long.parseLong(ex.getPathParameters().get(key).getFirst());
-  }
-
-  public static String pathParamString(HttpServerExchange ex, String key) {
-    return ex.getPathParameters().get(key).getFirst();
-  }
-
-  public static String queryParamString(HttpServerExchange ex, String key) {
-    return ex.getQueryParameters().get(key).getFirst();
-  }
-
-  public static int queryParamInt(HttpServerExchange ex, String key) {
-    return Integer.parseInt(ex.getQueryParameters().get(key).getFirst());
-  }
-
-  public static long queryParamLong(HttpServerExchange ex, String key) {
-    return Long.parseLong(ex.getQueryParameters().get(key).getFirst());
-  }
-
   public static Integer httpOk() { return StatusCodes.OK; }
 
 }

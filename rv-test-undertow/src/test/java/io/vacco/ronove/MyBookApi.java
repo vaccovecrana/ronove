@@ -1,9 +1,9 @@
-package io.vacco.ronove.exampleapi;
+package io.vacco.ronove;
 
 import jakarta.ws.rs.*;
 import java.util.*;
 
-public class BookApi {
+public class MyBookApi {
 
   public static final String v1BookCatalogIdList = "/v1/book/{catalogId}/list";
   public static final String v1BookGenreList = "/v1/book/genre/list";
