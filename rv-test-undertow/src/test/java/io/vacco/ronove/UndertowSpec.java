@@ -48,6 +48,8 @@ public class UndertowSpec {
             .add(HttpMethod.PATCH, v1GenreUpdate, ex -> jh.forBody(List.class, ls -> bookApi.v1GenreUpdate(ls), RvHandlers::httpOk))
             .get(any, ex -> notFound(g, ex, () -> StatusCodes.NOT_FOUND_STRING));
 
+        RvUndertowAdapter adapter = new RvUndertowAdapter(bookApi, g);
+
         Undertow server =
             Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")

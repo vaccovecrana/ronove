@@ -14,12 +14,13 @@ public class RvContext {
   public final Map<String, RvDescriptor> paths = new TreeMap<>();
   public final RvTypescriptFactory tsFactory = new RvTypescriptFactory();
 
-  public RvParameter describe(Parameter p) {
+  public RvParameter describe(Parameter p, int position) {
     try {
       RvParameter rp = new RvParameter();
       Type t = p.getParameterizedType();
       Annotation pt = paramTypeOf(p);
       Method value = pt instanceof BeanParam ? null : pt.getClass().getMethod("value");
+      rp.position = position;
       rp.paramType = pt;
       rp.name = value != null ? value.invoke(rp.paramType).toString() : null;
       rp.type = t;
@@ -37,7 +38,14 @@ public class RvContext {
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
     d.responseTsType = tsFactory.tsReturnTypeOf(m);
-    d.allParams = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
+
+    List<RvParameter> parameters = new ArrayList<>();
+    for (int i = 0; i < m.getParameters().length; i++) {
+      RvParameter rvp = describe(m.getParameters()[i], i);
+      parameters.add(i, rvp);
+    }
+
+    d.allParams = parameters;
     d.paramsTsList = d.allParams.stream()
         .map(prm -> format("%s: %s", prm.name != null ? prm.name : "body", prm.tsType))
         .collect(Collectors.joining(", "));
