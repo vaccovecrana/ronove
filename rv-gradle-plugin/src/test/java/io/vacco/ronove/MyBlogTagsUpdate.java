@@ -1,4 +1,4 @@
-package io.vacco.ronove.exampleapi;
+package io.vacco.ronove;
 
 import java.util.Set;
 

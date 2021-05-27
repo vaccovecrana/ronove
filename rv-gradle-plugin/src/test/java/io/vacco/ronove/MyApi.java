@@ -1,4 +1,4 @@
-package io.vacco.ronove.exampleapi;
+package io.vacco.ronove;
 
 import io.vacco.oruzka.core.OzReply;
 import jakarta.ws.rs.*;

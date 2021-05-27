@@ -1,6 +1,5 @@
 package io.vacco.ronove;
 
-import io.vacco.ronove.exampleapi.MyApi;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;

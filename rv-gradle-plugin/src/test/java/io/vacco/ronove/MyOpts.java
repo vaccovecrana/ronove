@@ -1,4 +1,4 @@
-package io.vacco.ronove.exampleapi;
+package io.vacco.ronove;
 
 public enum MyOpts {
   SOME, SET, OF, CHOICES
