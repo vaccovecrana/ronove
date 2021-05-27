@@ -11,6 +11,8 @@ public class BookApi {
   public static final String v1BookCatalog = "/v1/book/catalog";
   public static final String v1GenreUpdate = "/v1/genre/update";
 
+  public static final String any = "/*";
+
   public String[] genres = {"suspense", "fiction", "classic"};
 
   public static String[] bookTitles = {

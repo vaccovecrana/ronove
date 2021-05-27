@@ -2,48 +2,51 @@ package io.vacco.ronove.undertow;
 
 import com.google.gson.Gson;
 import io.undertow.server.*;
-import io.undertow.util.*;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.function.*;
+
+import static io.vacco.ronove.undertow.RvHandlers.*;
 
 public class RvJsonHandler {
 
   private final Gson gson;
+  private BiConsumer<HttpServerExchange, Exception> errorHandler;
 
   public RvJsonHandler(Gson gson) {
     this.gson = Objects.requireNonNull(gson);
+    this.errorHandler = (ex, e) -> defaultError(gson, ex, e);
   }
 
-  public void asJson(HttpServerExchange ex, Object response) {
-    String json = gson.toJson(response);
-    ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
-    ex.getResponseSender().send(json);
+  public RvJsonHandler withErrorHandler(BiConsumer<HttpServerExchange, Exception> errorHandler) {
+    this.errorHandler = Objects.requireNonNull(errorHandler);
+    return this;
   }
 
-  public static String asString(InputStream in) {
-    Scanner s = new Scanner(in).useDelimiter("\\A");
-    return s.next();
-  }
-
-  public void notFound(HttpServerExchange ex, Supplier<?> forResponse) {
-    ex.setStatusCode(StatusCodes.NOT_FOUND);
-    if (forResponse != null) {
-      asJson(ex, forResponse.get());
-    }
-  }
-
-  public <I, O> HttpHandler forBody(Function<I, O> handlerFn) {
+  public <I, O> HttpHandler forBody(Class<I> payloadType, Function<I, O> handlerFn, Supplier<Integer> statusCode) {
     return blockingTask(ex -> {
-      String raw = asString(ex.getInputStream());
-      I in = jsonFn.apply(raw);
-      handlerFn.apply(in);
+      try {
+        I in = gson.fromJson(new BufferedReader(new InputStreamReader(ex.getInputStream())), payloadType);
+        asJson(gson, ex, handlerFn.apply(in), statusCode.get());
+      } catch (Exception e) {
+        errorHandler.accept(ex, e);
+      }
     });
   }
 
-  public static <O> HttpHandler forSupplier(Function<HttpServerExchange, O> sup) {
-    return sup::apply;
+  public <O> O getHeader(HttpServerExchange ex, Class<O> headerType, String headerKey) {
+    return gson.fromJson(ex.getRequestHeaders().getFirst(headerKey), headerType);
+  }
+
+  public <O> HttpHandler forSupplier(Function<HttpServerExchange, O> response, Supplier<Integer> statusCode) {
+    return ex -> {
+      try {
+        asJson(gson, ex, response.apply(ex), statusCode.get());
+      } catch (Exception e) {
+        errorHandler.accept(ex, e);
+      }
+    };
   }
 
 }
