@@ -1,4 +1,4 @@
-package io.vacco.ronove.codegen;
+package io.vacco.ronove.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

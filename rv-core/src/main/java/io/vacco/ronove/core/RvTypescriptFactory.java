@@ -1,13 +1,11 @@
-package io.vacco.ronove.codegen;
+package io.vacco.ronove.core;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.math.*;
 import java.util.*;
 
-import static io.vacco.oruzka.util.OzMaps.*;
-
-public class RvTypeFactory {
+public class RvTypescriptFactory {
 
   private static final String any = "any";
   private static final String number = "number";
@@ -16,24 +14,35 @@ public class RvTypeFactory {
 
   public final Set<String> tsSchemaTypes = new TreeSet<>();
 
-  private static final Map<Serializable, String> tsTypes = mapOf(
-      kv(Object.class.getTypeName(), any),
-      kv(byte.class.getTypeName(), number), kv(Byte.class.getTypeName(), number),
-      kv(short.class.getTypeName(), number), kv(Short.class.getTypeName(), number),
-      kv(int.class.getTypeName(), number), kv(Integer.class.getTypeName(), number),
-      kv(long.class.getTypeName(), number), kv(Long.class.getTypeName(), number),
-      kv(float.class, number), kv(Float.class.getTypeName(), number),
+  private static final Map<Serializable, String> tsTypes = new HashMap<>();
 
-      kv(double.class.getTypeName(), number), kv(Double.class.getTypeName(), number),
-      kv(boolean.class.getTypeName(), number), kv(Boolean.class.getTypeName(), number),
-      kv(char.class.getTypeName(), string), kv(Character.class.getTypeName(), string),
+  static {
+    tsTypes.put(Object.class.getTypeName(), any);
 
-      kv(String.class.getTypeName(), string),
+    tsTypes.put(byte.class.getTypeName(), number);
+    tsTypes.put(Byte.class.getTypeName(), number);
+    tsTypes.put(short.class.getTypeName(), number);
+    tsTypes.put(Short.class.getTypeName(), number);
+    tsTypes.put(int.class.getTypeName(), number);
+    tsTypes.put(Integer.class.getTypeName(), number);
+    tsTypes.put(long.class.getTypeName(), number);
+    tsTypes.put(Long.class.getTypeName(), number);
+    tsTypes.put(float.class, number);
+    tsTypes.put(Float.class.getTypeName(), number);
+    tsTypes.put(double.class.getTypeName(), number);
+    tsTypes.put(Double.class.getTypeName(), number);
 
-      kv(BigDecimal.class.getTypeName(), number), kv(BigInteger.class.getTypeName(), number),
-      kv(Date.class.getTypeName(), date),
-      kv(UUID.class.getTypeName(), string)
-  );
+    tsTypes.put(boolean.class.getTypeName(), number);
+    tsTypes.put(Boolean.class.getTypeName(), number);
+    tsTypes.put(char.class.getTypeName(), string);
+    tsTypes.put(Character.class.getTypeName(), string);
+
+    tsTypes.put(String.class.getTypeName(), string);
+    tsTypes.put(BigDecimal.class.getTypeName(), number);
+    tsTypes.put(BigInteger.class.getTypeName(), number);
+    tsTypes.put(Date.class.getTypeName(), date);
+    tsTypes.put(UUID.class.getTypeName(), string);
+  }
 
   private Optional<Class<?>> getSchemaClass(Type t) {
     if (t instanceof Class) {
@@ -91,8 +100,8 @@ public class RvTypeFactory {
   }
 
   public String tsReturnTypeOf(Method m) {
-    Type mgrt = m.getGenericReturnType();
-    return mgrt instanceof ParameterizedType ? tsArgsOf((ParameterizedType) mgrt) : tsTypeOf(mgrt);
+    Type rt = m.getGenericReturnType();
+    return rt instanceof ParameterizedType ? tsArgsOf((ParameterizedType) rt) : tsTypeOf(rt);
   }
 
 }

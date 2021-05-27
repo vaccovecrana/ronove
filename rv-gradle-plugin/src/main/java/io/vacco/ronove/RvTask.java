@@ -2,7 +2,7 @@ package io.vacco.ronove;
 
 import io.github.classgraph.*;
 import io.vacco.oruzka.core.OFnBlock;
-import io.vacco.ronove.codegen.RvContext;
+import io.vacco.ronove.core.RvContext;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskAction;
@@ -24,7 +24,6 @@ public class RvTask extends DefaultTask {
   }
 
   private void doGenerate(Set<URL> urls) throws IOException {
-    RvContext ctx = new RvContext();
     RvPluginExtension ext = getProject().getExtensions().getByType(RvPluginExtension.class);
     ClassLoader gradleCl = this.getClass().getClassLoader();
     try (URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[0]), gradleCl)) {
@@ -33,7 +32,7 @@ public class RvTask extends DefaultTask {
           .overrideClassLoaders(ucl);
       String tsSrc;
       try (ScanResult scanResult = cg.scan()) {
-        tsSrc = ctx.render(scanResult.getAllClasses().loadClasses());
+        tsSrc = new RvTypescript().render(scanResult.getAllClasses().loadClasses());
       }
       Files.write(ext.outFile.get().getAsFile().toPath(), tsSrc.getBytes(StandardCharsets.UTF_8));
     }

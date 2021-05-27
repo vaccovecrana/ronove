@@ -1,4 +1,4 @@
-package io.vacco.ronove.codegen;
+package io.vacco.ronove.core;
 
 import jakarta.ws.rs.Path;
 import java.lang.annotation.Annotation;

@@ -1,8 +1,4 @@
-package io.vacco.ronove.codegen;
-
-import io.marioslab.basis.template.*;
-import io.vacco.oruzka.core.OFnSupplier;
-import org.gradle.api.logging.*;
+package io.vacco.ronove.core;
 
 import jakarta.ws.rs.*;
 import java.lang.annotation.Annotation;
@@ -10,18 +6,16 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.vacco.ronove.codegen.RvAnnotations.*;
+import static io.vacco.ronove.core.RvAnnotations.*;
 import static java.lang.String.format;
 
 public class RvContext {
 
-  private static final Logger log = Logging.getLogger(RvContext.class);
-
   public final Map<String, RvDescriptor> paths = new TreeMap<>();
-  public final RvTypeFactory df = new RvTypeFactory();
+  public final RvTypescriptFactory tsFactory = new RvTypescriptFactory();
 
   public RvParameter describe(Parameter p) {
-    return OFnSupplier.tryGet(() -> {
+    try {
       RvParameter rp = new RvParameter();
       Type t = p.getParameterizedType();
       Annotation pt = paramTypeOf(p);
@@ -29,20 +23,20 @@ public class RvContext {
       rp.paramType = pt;
       rp.name = value != null ? value.invoke(rp.paramType).toString() : null;
       rp.type = t;
-      rp.tsType = t instanceof ParameterizedType ? df.tsArgsOf((ParameterizedType) t) : df.tsTypeOf(t);
+      rp.tsType = t instanceof ParameterizedType ? tsFactory.tsArgsOf((ParameterizedType) t) : tsFactory.tsTypeOf(t);
       return rp;
-    });
+    } catch (Exception e) {
+      throw new IllegalStateException(format("Unable to map parameter [%s]", p), e);
+    }
   }
 
   public RvDescriptor describe(Method m, Path p, Annotation jaxRsMethod) {
-    String mTxt = String.format("Method: (%s) %s %s", jaxRsMethod, p, m);
-    log.warn(mTxt);
     RvDescriptor d = new RvDescriptor();
     d.path = p;
     d.handler = m;
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
-    d.responseTsType = df.tsReturnTypeOf(m);
+    d.responseTsType = tsFactory.tsReturnTypeOf(m);
     d.allParams = Arrays.stream(m.getParameters()).map(this::describe).collect(Collectors.toList());
     d.paramsTsList = d.allParams.stream()
         .map(prm -> format("%s: %s", prm.name != null ? prm.name : "body", prm.tsType))
@@ -63,7 +57,7 @@ public class RvContext {
       d.pathParams = parmIdx.get(PathParam.class.getSimpleName());
       d.pathParams.forEach(pp -> {
         if (!d.path.value().contains(pp.name)) {
-          throw new IllegalArgumentException(format(
+          throw new IllegalArgumentException(String.format(
               "Path parameter definition [%s] not found in controller path [%s]. Ensure parameter names match.",
               pp.name, d.path.value()
           ));
@@ -77,7 +71,7 @@ public class RvContext {
     return d;
   }
 
-  public Map<String, RvDescriptor> contextFor(List<Class<?>> controllers) {
+  public Map<String, RvDescriptor> describe(List<Class<?>> controllers) {
     for (Class<?> ct : controllers) {
       for (Method m : ct.getMethods()) {
         Optional<Annotation> op = Arrays.stream(m.getAnnotations()).filter(an -> Path.class.isAssignableFrom(an.getClass())).findFirst();
@@ -95,18 +89,8 @@ public class RvContext {
     return paths;
   }
 
-  public String render(List<Class<?>> controllers) {
-    log.warn("Generating RPC client from definitions: {}", controllers);
-    TemplateContext context = new TemplateContext();
-    TemplateLoader loader = new TemplateLoader.ClasspathTemplateLoader();
-    Template template = loader.load("/io/vacco/ronove/codegen/rv-ts-rpc.bt");
-    Map<String, RvDescriptor> ctx = contextFor(controllers);
-
-    context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
-    context.set("rvDescriptors", ctx.values());
-    context.set("tsSchemaTypes", String.join(", ", df.tsSchemaTypes));
-
-    return template.render(context);
+  public Map<String, RvDescriptor> describe(Class<?> controller) {
+    return describe(Collections.singletonList(controller));
   }
 
 }

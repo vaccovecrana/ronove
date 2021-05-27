@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
 import io.undertow.util.StatusCodes;
-import io.vacco.ronove.codegen.RvContext;
 import io.vacco.ronove.exampleapi.BookApi;
 import io.vacco.ronove.undertow.*;
 import j8spec.annotation.DefinedOrder;
@@ -26,7 +25,7 @@ import static io.vacco.ronove.exampleapi.BookApi.*;
 public class UndertowSpec {
   static {
     it("Can generate bindings for a test API", () -> {
-      System.out.println(new RvContext().render(Collections.singletonList(BookApi.class)));
+      System.out.println(new RvTypescript().render(Collections.singletonList(BookApi.class)));
     });
     it("Can serve an API using Undertow", () -> {
       if (GraphicsEnvironment.isHeadless()) {
