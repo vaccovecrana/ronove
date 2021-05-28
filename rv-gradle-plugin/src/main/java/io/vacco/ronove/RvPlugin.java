@@ -14,10 +14,6 @@ public class RvPlugin implements Plugin<Project> {
     project.getDependencies().add(implementation, "jakarta.ws.rs:jakarta.ws.rs-api:3.0.0");
     project.getExtensions().create("ronove", RvPluginExtension.class, project);
 
-    Task rvTsRpc = project.getTasks().create("ronoveTypescriptRpc", RvTask.class);
-    rvTsRpc.setGroup("build");
-    rvTsRpc.setDescription("Generates TS schema and RPC call stubs for jax-rs annotated controllers");
-
     project.getPlugins().apply(TypeScriptGeneratorPlugin.class);
     project.getTasks().withType(GenerateTask.class).configureEach(gt -> {
       Jackson2Configuration j2 = new Jackson2Configuration();
@@ -28,6 +24,14 @@ public class RvPlugin implements Plugin<Project> {
       gt.outputFileType = TypeScriptFileType.implementationFile;
       gt.outputKind = TypeScriptOutputKind.module;
     });
+
+    Task classes = project.getTasks().getByName("classes");
+    Task generateTypeScript = project.getTasks().getByName("generateTypeScript");
+    Task rvTsRpc = project.getTasks().create("ronoveTypescriptRpc", RvTask.class);
+
+    rvTsRpc.setGroup("build");
+    rvTsRpc.setDescription("Generates TS schema and RPC call stubs for jax-rs annotated controllers");
+    rvTsRpc.dependsOn(classes, generateTypeScript);
   }
 
 }
