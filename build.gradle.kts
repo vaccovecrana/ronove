@@ -10,4 +10,8 @@ subprojects {
     addJ8Spec()
     addClasspathHell()
   }
+
+  configure<io.vacco.cphell.ChPluginExtension> {
+    resourceExclusions.add("module-info.class")
+  }
 }
