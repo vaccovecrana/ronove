@@ -4,6 +4,7 @@ import jakarta.ws.rs.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class RvAnnotations {
 
@@ -43,6 +44,13 @@ public class RvAnnotations {
             "Parameter [%s] has no query, path, header or bean jax-rs annotations. Verify method signature.",
             p
         )));
+  }
+
+  public static Optional<DefaultValue> defaultValueOf(Parameter p) {
+    return Arrays.stream(p.getAnnotations())
+        .filter(an -> DefaultValue.class.isAssignableFrom(an.getClass()))
+        .map(an -> (DefaultValue) an)
+        .findFirst();
   }
 
 }

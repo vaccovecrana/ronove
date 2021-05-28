@@ -30,10 +30,11 @@ public class RvHandlers {
   }
 
   public static void defaultError(Gson gson, HttpServerExchange ex, Exception e) {
-    PrintWriter out = new PrintWriter(new StringWriter());
+    StringWriter sw = new StringWriter();
+    PrintWriter out = new PrintWriter(sw);
     e.printStackTrace(out);
     asJson(
-        gson, ex, out.toString(),
+        gson, ex, sw.toString(),
         e instanceof WebApplicationException
             ? ((WebApplicationException) e).getResponse().getStatus()
             : StatusCodes.INTERNAL_SERVER_ERROR

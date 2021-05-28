@@ -25,6 +25,7 @@ public class RvContext {
       rp.name = value != null ? value.invoke(rp.paramType).toString() : null;
       rp.type = t;
       rp.tsType = t instanceof ParameterizedType ? tsFactory.tsArgsOf((ParameterizedType) t) : tsFactory.tsTypeOf(t);
+      defaultValueOf(p).ifPresent(dv -> rp.defaultValue = dv);
       return rp;
     } catch (Exception e) {
       throw new IllegalStateException(format("Unable to map parameter [%s]", p), e);
