@@ -1,11 +1,9 @@
 package io.vacco.ronove.undertow;
 
-import com.google.gson.Gson;
 import io.undertow.server.*;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 
-import java.io.*;
 import java.util.*;
 import java.util.function.*;
 
@@ -16,15 +14,17 @@ public class RvUndertowAdapter<Controller> {
 
   public final RoutingHandler routingHandler = new RoutingHandler();
 
-  private final Gson gson;
+  private final RvJsonInput jin;
+  private final RvJsonOutput jout;
   private final Controller controller;
   private BiConsumer<HttpServerExchange, Exception> errorHandler;
 
-  public RvUndertowAdapter(Controller c, Gson g) {
-    this.gson = Objects.requireNonNull(g);
+  public RvUndertowAdapter(Controller c, RvJsonInput jin, RvJsonOutput jout) {
+    this.jin = Objects.requireNonNull(jin);
+    this.jout = Objects.requireNonNull(jout);
     this.controller = Objects.requireNonNull(c);
     Map<String, RvDescriptor> idx = new RvContext().describe(c.getClass());
-    this.errorHandler = (ex, e) -> defaultError(g, ex, e);
+    this.errorHandler = (ex, e) -> defaultError(jout, ex, e);
     for (RvDescriptor d : idx.values()) {
       routingHandler.add(d.httpMethodTxt, d.path.value(), forDescriptor(d));
     }
@@ -37,9 +37,9 @@ public class RvUndertowAdapter<Controller> {
   private Object extract(Map<String, Deque<String>> pMap, RvParameter p) {
     Deque<String> dq = pMap.get(p.name);
     if (dq != null) {
-      return gson.fromJson(dq.getFirst(), p.type);
+      return jin.fromJson(dq.getFirst(), p.type);
     } else if (p.defaultValue != null) {
-      return gson.fromJson(p.defaultValue.value(), p.type);
+      return jin.fromJson(p.defaultValue.value(), p.type);
     }
     String msg = format("Missing parameter with no optional value: [%s]", p.paramType.toString().replace("@jakarta.ws.rs.", ""));
     throw new IllegalArgumentException(msg);
@@ -47,7 +47,7 @@ public class RvUndertowAdapter<Controller> {
 
   private Object extract(HeaderMap headers, RvParameter p) {
     String val = headers.getFirst(p.name);
-    return gson.fromJson(val, p.type);
+    return jin.fromJson(val, p.type);
   }
 
   private HttpHandler forDescriptor(RvDescriptor rvd) {
@@ -64,11 +64,11 @@ public class RvUndertowAdapter<Controller> {
           params[hp.position] = extract(ex.getRequestHeaders(), hp);
         }
         if (rvd.beanParam != null) {
-          Object in = gson.fromJson(new BufferedReader(new InputStreamReader(ex.getInputStream())), rvd.beanParam.type);
+          Object in = jin.fromJson(ex.getInputStream(), rvd.beanParam.type);
           params[rvd.beanParam.position] = in;
         }
         Object out = rvd.handler.invoke(controller, params);
-        asJson(gson, ex, out, StatusCodes.OK); // TODO so how do we return different success status codes?
+        asJson(jout, ex, out, StatusCodes.OK); // TODO so how do we return different success status codes?
       } catch (Exception e) {
         this.errorHandler.accept(ex, e);
       }

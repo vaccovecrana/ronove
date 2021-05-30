@@ -1,10 +1,9 @@
 package io.vacco.ronove;
 
-import static j8spec.J8Spec.*;
-
 import com.google.gson.Gson;
 import io.undertow.Undertow;
 import io.undertow.util.StatusCodes;
+import io.vacco.ronove.core.*;
 import io.vacco.ronove.undertow.*;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
@@ -13,6 +12,7 @@ import org.junit.runner.RunWith;
 import java.awt.*;
 import java.util.*;
 
+import static j8spec.J8Spec.*;
 import static io.vacco.ronove.undertow.RvHandlers.*;
 
 @DefinedOrder
@@ -28,9 +28,11 @@ public class UndertowSpec {
       } else {
         Gson g = new Gson();
         MyBookApi bookApi = new MyBookApi();
-        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, g);
+        RvJsonInput jin = g::fromJson;
+        RvJsonOutput jout = g::toJson;
+        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, jin, jout);
 
-        utBookApi.routingHandler.get(MyBookApi.any, ex -> notFound(g, ex, () -> StatusCodes.NOT_FOUND_STRING));
+        utBookApi.routingHandler.get(MyBookApi.any, ex -> notFound(jout, ex, () -> StatusCodes.NOT_FOUND_STRING));
 
         Undertow server =
             Undertow.builder()
