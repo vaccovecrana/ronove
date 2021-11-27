@@ -32,12 +32,12 @@ public class RvContext {
     }
   }
 
-  public RvDescriptor describe(Method m, Path p, Annotation jaxRsMethod, RvStatus rvStatus) {
+  public RvDescriptor describe(Method m, Path p, Annotation jxRsMethod, RvStatus rvStatus) {
     RvDescriptor d = new RvDescriptor();
     d.path = p;
     d.handler = m;
-    d.httpMethod = jaxRsMethod;
-    d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
+    d.httpMethod = jxRsMethod;
+    d.httpMethodTxt = jxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
     d.httpStatus = rvStatus;
     d.responseTsType = tsFactory.tsReturnTypeOf(m);
 

@@ -4,6 +4,7 @@ import io.undertow.server.*;
 import io.undertow.server.handlers.*;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
+import jakarta.ws.rs.core.MediaType;
 
 import java.io.*;
 import java.util.function.*;
@@ -24,7 +25,7 @@ public class RvHandlers {
   public static HttpHandler forJson(RvJsonOutput jOut, Function<HttpServerExchange, ?> bodyFn, int statusCode) {
     return ex -> {
       ex.setStatusCode(statusCode);
-      ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+      ex.getResponseHeaders().put(Headers.CONTENT_TYPE, MediaType.APPLICATION_JSON);
       Object body = bodyFn.apply(ex);
       if (body != null) {
         String json = jOut.toJson(body);
