@@ -36,7 +36,7 @@ public class UndertowSpec {
 
         Undertow server =
             Undertow.builder()
-                .addHttpListener(8080, "0.0.0.0")
+                .addHttpListener(8888, "0.0.0.0")
                 .setHandler(logRequest(utBookApi.routingHandler, ex -> System.out.println(ex.toString())))
                 .build();
 
