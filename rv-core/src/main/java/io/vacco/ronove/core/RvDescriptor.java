@@ -10,6 +10,7 @@ public class RvDescriptor {
   public Method handler;
   public Annotation httpMethod;
   public String httpMethodTxt;
+  public RvStatus httpStatus;
   public Path path;
   public String responseTsType;
   public String paramsTsList;

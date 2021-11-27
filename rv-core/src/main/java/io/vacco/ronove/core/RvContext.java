@@ -32,12 +32,13 @@ public class RvContext {
     }
   }
 
-  public RvDescriptor describe(Method m, Path p, Annotation jaxRsMethod) {
+  public RvDescriptor describe(Method m, Path p, Annotation jaxRsMethod, RvStatus rvStatus) {
     RvDescriptor d = new RvDescriptor();
     d.path = p;
     d.handler = m;
     d.httpMethod = jaxRsMethod;
     d.httpMethodTxt = jaxRsMethod.toString().replace("@jakarta.ws.rs.", "").replace("()", "");
+    d.httpStatus = rvStatus;
     d.responseTsType = tsFactory.tsReturnTypeOf(m);
 
     List<RvParameter> parameters = new ArrayList<>();
@@ -83,10 +84,11 @@ public class RvContext {
   public Map<String, RvDescriptor> describe(List<Class<?>> controllers) {
     for (Class<?> ct : controllers) {
       for (Method m : ct.getMethods()) {
-        Optional<Annotation> op = Arrays.stream(m.getAnnotations()).filter(an -> Path.class.isAssignableFrom(an.getClass())).findFirst();
-        Optional<Annotation> ojxm = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsMethod).findFirst();
-        if (op.isPresent() && ojxm.isPresent()) {
-          RvDescriptor rd = describe(m, (Path) op.get(), ojxm.get());
+        Optional<Annotation> op = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsPath).findFirst();
+        Optional<Annotation> oJxm = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsMethod).findFirst();
+        Optional<Annotation> oRvStat = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isRvStatus).findFirst();
+        if (op.isPresent() && oJxm.isPresent()) {
+          RvDescriptor rd = describe(m, (Path) op.get(), oJxm.get(), (RvStatus) oRvStat.orElse(null));
           String path = rd.path.value();
           if (paths.containsKey(path)) {
             throw new RvException.RvDuplicateMappingException(path, rd, paths.get(path));

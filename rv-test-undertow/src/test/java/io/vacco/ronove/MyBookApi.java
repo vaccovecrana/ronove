@@ -1,6 +1,9 @@
 package io.vacco.ronove;
 
+import io.vacco.ronove.core.RvStatus;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
+
 import java.util.*;
 
 public class MyBookApi {
@@ -10,8 +13,6 @@ public class MyBookApi {
   public static final String v1BookGenre = "/v1/book/genre";
   public static final String v1BookCatalog = "/v1/book/catalog";
   public static final String v1GenreUpdate = "/v1/genre/update";
-
-  public static final String any = "/*";
 
   public String[] genres = {"suspense", "fiction", "classic"};
 
@@ -46,8 +47,9 @@ public class MyBookApi {
   }
 
   @PATCH @Path(v1GenreUpdate)
-  public long[] v1GenreUpdate(@BeanParam List<String> genreUpdates) {
-    return new long[] {111L, 222L, 333L};
+  @RvStatus(Response.Status.NO_CONTENT)
+  public void v1GenreUpdate(@BeanParam List<String> genreUpdates) {
+    System.out.println("Lol updated");
   }
 
 }

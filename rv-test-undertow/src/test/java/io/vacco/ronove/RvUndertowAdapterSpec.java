@@ -1,7 +1,10 @@
 package io.vacco.ronove;
 
 import com.google.gson.Gson;
+import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.ExceptionHandler;
 import io.undertow.util.StatusCodes;
 import io.vacco.ronove.core.*;
 import io.vacco.ronove.undertow.*;
@@ -17,7 +20,7 @@ import static io.vacco.ronove.undertow.RvHandlers.*;
 
 @DefinedOrder
 @RunWith(J8SpecRunner.class)
-public class UndertowSpec {
+public class RvUndertowAdapterSpec {
   static {
     it("Can generate bindings for a test API", () -> {
       System.out.println(new RvTypescript().render(Collections.singletonList(MyBookApi.class)));
@@ -28,18 +31,24 @@ public class UndertowSpec {
       } else {
         Gson g = new Gson();
         MyBookApi bookApi = new MyBookApi();
-        RvJsonInput jin = g::fromJson;
-        RvJsonOutput jout = g::toJson;
-        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, jin, jout);
-
-        utBookApi.routingHandler.get(MyBookApi.any, ex -> notFound(jout, ex, () -> StatusCodes.NOT_FOUND_STRING));
-
+        RvJsonInput jIn = g::fromJson;
+        RvJsonOutput jOut = g::toJson;
+        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, jIn, jOut);
+        HttpHandler errorHdl = forError(jOut, (xc, t) -> t != null ? t.getMessage() : "???");
+        HttpHandler notFoundHdl = forJson(jOut, ex -> StatusCodes.NOT_FOUND_STRING, StatusCodes.NOT_FOUND);
         Undertow server =
             Undertow.builder()
                 .addHttpListener(8888, "0.0.0.0")
-                .setHandler(logRequest(utBookApi.routingHandler, ex -> System.out.println(ex.toString())))
-                .build();
-
+                .setHandler(
+                    Handlers.exceptionHandler(
+                        forLogging(
+                            utBookApi.routingHandler
+                                .setFallbackHandler(notFoundHdl)
+                                .setInvalidMethodHandler(notFoundHdl),
+                            ex -> System.out.println(ex.toString())
+                        )
+                    ).addExceptionHandler(Exception.class, errorHdl)
+                ).build();
         server.start();
         Thread.sleep(60000);
       }

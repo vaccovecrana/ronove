@@ -1,50 +1,54 @@
 package io.vacco.ronove.undertow;
 
 import io.undertow.server.*;
-import io.undertow.server.handlers.BlockingHandler;
+import io.undertow.server.handlers.*;
 import io.undertow.util.*;
-import io.vacco.ronove.core.RvJsonOutput;
-import jakarta.ws.rs.WebApplicationException;
+import io.vacco.ronove.core.*;
 
 import java.io.*;
 import java.util.function.*;
 
 public class RvHandlers {
 
-  public static HttpHandler logRequest(HttpHandler hdl, Consumer<HttpServerExchange> logCons) {
+  public static HttpHandler forLogging(HttpHandler hdl, Consumer<HttpServerExchange> logCons) {
     return (ex) -> {
       logCons.accept(ex);
       hdl.handleRequest(ex);
     };
   }
 
-  public static HttpHandler blockingTask(HttpHandler hdl) {
+  public static HttpHandler forBlocking(HttpHandler hdl) {
     return new BlockingHandler(hdl);
   }
 
-  public static void asJson(RvJsonOutput jout, HttpServerExchange ex, Object response, int statusCode) {
-    String json = jout.toJson(response);
-    ex.setStatusCode(statusCode);
-    ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
-    ex.getResponseSender().send(json);
+  public static HttpHandler forJson(RvJsonOutput jOut, Function<HttpServerExchange, ?> bodyFn, int statusCode) {
+    return ex -> {
+      ex.setStatusCode(statusCode);
+      ex.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+      Object body = bodyFn.apply(ex);
+      if (body != null) {
+        String json = jOut.toJson(body);
+        ex.getResponseSender().send(json);
+      }
+    };
+  }
+  public static HttpHandler forError(RvJsonOutput jOut, BiFunction<HttpServerExchange, Throwable, ?> bodyFn) {
+    return ex -> {
+      Throwable t = ex.getAttachment(ExceptionHandler.THROWABLE);
+      forJson(
+          jOut, ex0 -> bodyFn.apply(ex0, t),
+          t instanceof RvException.RvApplicationException
+              ? ((RvException.RvApplicationException) t).status.getStatusCode()
+              : StatusCodes.INTERNAL_SERVER_ERROR
+      ).handleRequest(ex);
+    };
   }
 
-  public static void defaultError(RvJsonOutput jout, HttpServerExchange ex, Exception e) {
+  public static String dumpStack(Throwable t) {
     StringWriter sw = new StringWriter();
     PrintWriter out = new PrintWriter(sw);
-    e.printStackTrace(out);
-    asJson(
-        jout, ex, sw.toString(),
-        e instanceof WebApplicationException
-            ? ((WebApplicationException) e).getResponse().getStatus()
-            : StatusCodes.INTERNAL_SERVER_ERROR
-    );
+    if (t != null) { t.printStackTrace(out); }
+    return t != null ? sw.toString() : "?";
   }
-
-  public static void notFound(RvJsonOutput jout, HttpServerExchange ex, Supplier<?> forResponse) {
-    asJson(jout, ex, forResponse.get(), StatusCodes.NOT_FOUND);
-  }
-
-  public static Integer httpOk() { return StatusCodes.OK; }
 
 }

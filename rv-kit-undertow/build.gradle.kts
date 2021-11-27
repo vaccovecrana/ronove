@@ -4,7 +4,5 @@ val api by configurations
 
 dependencies {
   api(project(":rv-core"))
-  api("io.vacco.flatbread:flatbread:0.1.1")
-  api("org.codejargon.feather:feather:1.0")
-  api("io.undertow:undertow-core:2.2.7.Final")
+  api("io.undertow:undertow-core:2.2.13.Final")
 }

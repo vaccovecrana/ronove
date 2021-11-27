@@ -1,7 +1,9 @@
 package io.vacco.ronove;
 
-import io.vacco.oruzka.core.OzReply;
+import io.vacco.oruzka.core.*;
+import io.vacco.ronove.core.RvStatus;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 import java.util.*;
 
@@ -47,6 +49,7 @@ public class MyApi {
     return OzReply.asOk(new String[] {"cooking", "cats", "latest"});
   }
 
+  @RvStatus(Response.Status.NO_CONTENT)
   @PATCH @Path("/v1/blog/tags/update")
   public OzReply<Long[]> patchBlogTags(@BeanParam List<MyBlogTagsUpdate> blogUpdates) {
     return OzReply.asOk(new Long[] {111L, 222L, 333L});

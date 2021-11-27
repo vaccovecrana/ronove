@@ -36,6 +36,14 @@ public class RvAnnotations {
         || isJaxRsBodyParam(an);
   }
 
+  public static boolean isJaxRsPath(Annotation an) {
+    return Path.class.isAssignableFrom(an.getClass());
+  }
+
+  public static boolean isRvStatus(Annotation an) {
+    return RvStatus.class.isAssignableFrom(an.getClass());
+  }
+
   public static Annotation paramTypeOf(Parameter p) {
     return Arrays.stream(p.getAnnotations())
         .filter(RvAnnotations::isJaxRsParam)
