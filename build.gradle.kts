@@ -1,20 +1,13 @@
-plugins { id("io.vacco.common-build") version "0.5.3" }
+plugins { id("io.vacco.oss.gitflow") version "0.9.8" }
 
 subprojects {
-  apply(plugin = "io.vacco.common-build")
+  apply(plugin = "io.vacco.oss.gitflow")
   group = "io.vacco.ronove"
   version = "0.1.3"
 
-  configure<io.vacco.common.CbPluginProfileExtension> {
+  configure<io.vacco.oss.gitflow.GsPluginProfileExtension> {
     addJ8Spec()
-    addPmd()
-    addSpotBugs()
-    setPublishingUrlTransform { repo -> "${repo.url}/${rootProject.name}" }
-    sharedLibrary()
-  }
-
-  configure<JavaPluginExtension> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    addClasspathHell()
+    sharedLibrary(true, false)
   }
 }

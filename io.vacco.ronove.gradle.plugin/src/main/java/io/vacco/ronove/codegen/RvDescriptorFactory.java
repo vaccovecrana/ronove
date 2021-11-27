@@ -37,7 +37,7 @@ public class RvDescriptorFactory {
       kv(UUID.class.getTypeName(), string)
   );
 
-  private Optional<Class<?>> getSchemaclass(Type t) {
+  private Optional<Class<?>> getSchemaClass(Type t) {
     if (t instanceof Class) {
       return Optional.of((Class<?>) t);
     } else if (t instanceof ParameterizedType) {
@@ -60,7 +60,7 @@ public class RvDescriptorFactory {
   public String simpleNameOf(Type t) {
     String rawClass = t instanceof ParameterizedType ?
         ((ParameterizedType) t).getRawType().getTypeName() : t.getTypeName();
-    getSchemaclass(t).ifPresent(cl -> tsSchemaTypes.add(simpleNameOf(cl.getCanonicalName())));
+    getSchemaClass(t).ifPresent(cl -> tsSchemaTypes.add(simpleNameOf(cl.getCanonicalName())));
     return simpleNameOf(rawClass);
   }
 
