@@ -31,19 +31,22 @@ public class RvUndertowAdapterSpec {
         MyBookApi bookApi = new MyBookApi();
         RvJsonInput jIn = g::fromJson;
         RvJsonOutput jOut = g::toJson;
-        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<MyBookApi>(bookApi, jIn, jOut, (ex, clazz) -> {
-          // Perform some sort of authentication in a parent handler, place a derived object, and retrieve it here.
-          // This is just a quick example.
-          if (clazz == MyUser.class) {
-            MyUser authenticatedUser = new MyUser();
-            authenticatedUser.nickName = "gopher";
-            authenticatedUser.avatarUrl = "https://avatar.me/gopher";
-            AttachmentKey<MyUser> uk = AttachmentKey.create(MyUser.class);
-            ex.putAttachment(uk, authenticatedUser);
-            return ex.getAttachment(uk);
-          }
-          return null;
-        });
+
+        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<MyBookApi>(bookApi, jIn, jOut)
+            .withAttachmentProcessor((ex, clazz) -> {
+              // Perform some sort of authentication in a parent handler, place a derived object, and retrieve it here.
+              // This is just a quick example.
+              if (clazz == MyUser.class) {
+                MyUser authenticatedUser = new MyUser();
+                authenticatedUser.nickName = "gopher";
+                authenticatedUser.avatarUrl = "https://avatar.me/gopher";
+                AttachmentKey<MyUser> uk = AttachmentKey.create(MyUser.class);
+                ex.putAttachment(uk, authenticatedUser);
+                return ex.getAttachment(uk);
+              }
+              return null;
+            });
+
         HttpHandler errorHdl = forError(jOut, (xc, t) -> {
           if (t != null) {
             t.printStackTrace();
