@@ -51,8 +51,12 @@ public class MyApi {
 
   @RvStatus(Response.Status.NO_CONTENT)
   @PATCH @Path("/v1/blog/tags/update")
-  public OzReply<Long[]> patchBlogTags(@BeanParam List<MyBlogTagsUpdate> blogUpdates) {
-    return OzReply.asOk(new Long[] {111L, 222L, 333L});
+  public OzReply<Object[]> patchBlogTags(@BeanParam List<MyBlogTagsUpdate> blogUpdates,
+                                         @HeaderParam("xToken") String token) {
+    Object[] res = new Object[2];
+    res[0] = new Long[] {111L, 222L, 333L};
+    res[1] = token;
+    return OzReply.asOk(res);
   }
 
 }

@@ -8,6 +8,7 @@ import java.util.*;
 public class RvTypescriptFactory {
 
   private static final String any = "any";
+  private static final String tBoolean = "boolean";
   private static final String number = "number";
   private static final String string = "string";
   private static final String date = "Date";
@@ -32,8 +33,9 @@ public class RvTypescriptFactory {
     tsTypes.put(double.class.getTypeName(), number);
     tsTypes.put(Double.class.getTypeName(), number);
 
-    tsTypes.put(boolean.class.getTypeName(), number);
-    tsTypes.put(Boolean.class.getTypeName(), number);
+    tsTypes.put(boolean.class.getTypeName(), tBoolean);
+    tsTypes.put(Boolean.class.getTypeName(), tBoolean);
+
     tsTypes.put(char.class.getTypeName(), string);
     tsTypes.put(Character.class.getTypeName(), string);
 

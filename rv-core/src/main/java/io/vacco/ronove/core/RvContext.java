@@ -19,7 +19,7 @@ public class RvContext {
       RvParameter rp = new RvParameter();
       Type t = p.getParameterizedType();
       Annotation pt = paramTypeOf(p);
-      Method value = pt instanceof BeanParam ? null : pt.getClass().getMethod("value");
+      Method value = isJaxRsBodyParam(pt) ? null : pt.getClass().getMethod("value");
       rp.position = position;
       rp.paramType = pt;
       rp.name = value != null ? value.invoke(rp.paramType).toString() : null;
@@ -49,7 +49,8 @@ public class RvContext {
 
     d.allParams = parameters;
     d.paramsTsList = d.allParams.stream()
-        .map(prm -> format("%s: %s", prm.name != null ? prm.name : "body", prm.tsType))
+        .filter(prm -> !RvAnnotations.isRvAttachmentParam(prm.paramType))
+        .map(prm -> format("%s: %s", prm.name != null ? prm.name.replaceAll("[^a-zA-Z0-9]", "") : "body", prm.tsType))
         .collect(Collectors.joining(", "));
 
     Map<String, List<RvParameter>> parmIdx = d.allParams.stream().collect(Collectors.groupingBy(prm -> prm.paramType.annotationType().getSimpleName()));
@@ -62,6 +63,9 @@ public class RvContext {
     }
     if (parmIdx.get(HeaderParam.class.getSimpleName()) != null) {
       d.headerParams = parmIdx.get(HeaderParam.class.getSimpleName());
+    }
+    if (parmIdx.get(RvAttachmentParam.class.getSimpleName()) != null) {
+      d.attachmentParams = parmIdx.get(RvAttachmentParam.class.getSimpleName());
     }
     if (parmIdx.get(PathParam.class.getSimpleName()) != null) {
       d.pathParams = parmIdx.get(PathParam.class.getSimpleName());

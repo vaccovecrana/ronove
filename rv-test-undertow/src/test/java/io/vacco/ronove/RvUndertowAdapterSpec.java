@@ -1,11 +1,9 @@
 package io.vacco.ronove;
 
 import com.google.gson.Gson;
-import io.undertow.Handlers;
-import io.undertow.Undertow;
+import io.undertow.*;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.ExceptionHandler;
-import io.undertow.util.StatusCodes;
+import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 import io.vacco.ronove.undertow.*;
 import j8spec.annotation.DefinedOrder;
@@ -22,7 +20,7 @@ import static io.vacco.ronove.undertow.RvHandlers.*;
 @RunWith(J8SpecRunner.class)
 public class RvUndertowAdapterSpec {
   static {
-    it("Can generate bindings for a test API", () -> {
+    it("Can generate Typescript bindings for a test API", () -> {
       System.out.println(new RvTypescript().render(Collections.singletonList(MyBookApi.class)));
     });
     it("Can serve an API using Undertow", () -> {
@@ -33,8 +31,25 @@ public class RvUndertowAdapterSpec {
         MyBookApi bookApi = new MyBookApi();
         RvJsonInput jIn = g::fromJson;
         RvJsonOutput jOut = g::toJson;
-        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, jIn, jOut);
-        HttpHandler errorHdl = forError(jOut, (xc, t) -> t != null ? t.getMessage() : "???");
+        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<MyBookApi>(bookApi, jIn, jOut, (ex, clazz) -> {
+          // Perform some sort of authentication in a parent handler, place a derived object, and retrieve it here.
+          // This is just a quick example.
+          if (clazz == MyUser.class) {
+            MyUser authenticatedUser = new MyUser();
+            authenticatedUser.nickName = "gopher";
+            authenticatedUser.avatarUrl = "https://avatar.me/gopher";
+            AttachmentKey<MyUser> uk = AttachmentKey.create(MyUser.class);
+            ex.putAttachment(uk, authenticatedUser);
+            return ex.getAttachment(uk);
+          }
+          return null;
+        });
+        HttpHandler errorHdl = forError(jOut, (xc, t) -> {
+          if (t != null) {
+            t.printStackTrace();
+          }
+          return t != null ? t.getMessage() : "???";
+        });
         HttpHandler notFoundHdl = forJson(jOut, ex -> StatusCodes.NOT_FOUND_STRING, StatusCodes.NOT_FOUND);
         Undertow server =
             Undertow.builder()

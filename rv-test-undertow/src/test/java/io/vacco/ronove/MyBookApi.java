@@ -1,5 +1,6 @@
 package io.vacco.ronove;
 
+import io.vacco.ronove.core.RvAttachmentParam;
 import io.vacco.ronove.core.RvStatus;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -13,6 +14,7 @@ public class MyBookApi {
   public static final String v1BookGenre = "/v1/book/genre";
   public static final String v1BookCatalog = "/v1/book/catalog";
   public static final String v1GenreUpdate = "/v1/genre/update";
+  public static final String v1Me = "/v1/me";
 
   public String[] genres = {"suspense", "fiction", "classic"};
 
@@ -50,6 +52,15 @@ public class MyBookApi {
   @RvStatus(Response.Status.NO_CONTENT)
   public void v1GenreUpdate(@BeanParam List<String> genreUpdates) {
     System.out.println("Lol updated");
+  }
+
+  @GET @Path(v1Me)
+  public MyUser v1Me(@QueryParam("includeAvatar") boolean includeAvatar,
+                     @RvAttachmentParam(MyUser.class) MyUser sessionUser) {
+    if (!includeAvatar) {
+      sessionUser.avatarUrl = null;
+    }
+    return sessionUser;
   }
 
 }

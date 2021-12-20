@@ -44,12 +44,14 @@ public class RvAnnotations {
     return RvStatus.class.isAssignableFrom(an.getClass());
   }
 
+  public static boolean isRvAttachmentParam(Annotation an) { return RvAttachmentParam.class.isAssignableFrom(an.getClass()); }
+
   public static Annotation paramTypeOf(Parameter p) {
     return Arrays.stream(p.getAnnotations())
-        .filter(RvAnnotations::isJaxRsParam)
+        .filter(an -> RvAnnotations.isJaxRsParam(an) || RvAnnotations.isRvAttachmentParam(an))
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException(String.format(
-            "Parameter [%s] has no query, path, header or bean jax-rs annotations. Verify method signature.",
+            "Parameter [%s] has no query, path, header or bean jax-rs parameter annotations, nor attachment parameter annotations. Verify method signature.",
             p
         )));
   }

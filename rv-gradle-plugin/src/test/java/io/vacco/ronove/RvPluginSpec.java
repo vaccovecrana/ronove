@@ -16,7 +16,7 @@ public class RvPluginSpec {
 
   static {
     describe(RvPlugin.class.getCanonicalName(),
-        () -> it("can read service endpoint methods from annotated classes",
+        () -> it("Can render Typescript bindings from annotated classes",
             () -> log.warn(new RvTypescript().render(Collections.singletonList(MyApi.class)))));
   }
 

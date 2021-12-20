@@ -4,6 +4,7 @@ import io.undertow.server.*;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static io.vacco.ronove.undertow.RvHandlers.*;
 import static java.lang.String.format;
@@ -15,15 +16,22 @@ public class RvUndertowAdapter<Controller> {
   private final RvJsonInput jIn;
   private final RvJsonOutput jOut;
   private final Controller controller;
+  private final BiFunction<HttpServerExchange, Class<?>, Object> attachmentFn;
 
-  public RvUndertowAdapter(Controller c, RvJsonInput jIn, RvJsonOutput jOut) {
+  public RvUndertowAdapter(Controller c, RvJsonInput jIn, RvJsonOutput jOut,
+                           BiFunction<HttpServerExchange, Class<?>, Object> attachmentFn) {
     this.jIn = Objects.requireNonNull(jIn);
     this.jOut = Objects.requireNonNull(jOut);
     this.controller = Objects.requireNonNull(c);
+    this.attachmentFn = attachmentFn;
     Map<String, RvDescriptor> idx = new RvContext().describe(c.getClass());
     for (RvDescriptor d : idx.values()) {
       routingHandler.add(d.httpMethodTxt, d.path.value(), forDescriptor(d));
     }
+  }
+
+  public RvUndertowAdapter(Controller c, RvJsonInput jIn, RvJsonOutput jOut) {
+    this(c, jIn, jOut, null);
   }
 
   private HttpHandler wrap(HttpHandler rvh, RvDescriptor rvd) {
@@ -59,6 +67,16 @@ public class RvUndertowAdapter<Controller> {
             }
             for (RvParameter hp : rvd.headerParams) {
               params[hp.position] = extract(ex.getRequestHeaders(), hp);
+            }
+            if (!rvd.attachmentParams.isEmpty()) {
+              if (attachmentFn == null) {
+                String msg = String.format("No request attachment mapping function provided for attachment parameters %s", rvd.attachmentParams);
+                throw new IllegalStateException(msg);
+              }
+              for (RvParameter ap: rvd.attachmentParams) {
+                RvAttachmentParam attP = (RvAttachmentParam) ap.paramType;
+                params[ap.position] = attachmentFn.apply(ex, attP.value());
+              }
             }
             if (rvd.beanParam != null) {
               Object in = jIn.fromJson(ex.getInputStream(), rvd.beanParam.type);

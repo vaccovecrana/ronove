@@ -19,6 +19,7 @@ public class RvDescriptor {
   public List<RvParameter> queryParams = new ArrayList<>();
   public List<RvParameter> headerParams = new ArrayList<>();
   public List<RvParameter> pathParams = new ArrayList<>();
+  public List<RvParameter> attachmentParams = new ArrayList<>();
 
   public List<RvParameter> allParams = new ArrayList<>();
 
