@@ -93,11 +93,11 @@ public class RvContext {
         Optional<Annotation> oRvStat = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isRvStatus).findFirst();
         if (op.isPresent() && oJxm.isPresent()) {
           RvDescriptor rd = describe(m, (Path) op.get(), oJxm.get(), (RvStatus) oRvStat.orElse(null));
-          String path = rd.path.value();
-          if (paths.containsKey(path)) {
-            throw new RvException.RvDuplicateMappingException(path, rd, paths.get(path));
+          String pathKey = String.format("%s:%s", rd.httpMethodTxt, rd.path.value());
+          if (paths.containsKey(pathKey)) {
+            throw new RvException.RvDuplicateMappingException(pathKey, rd, paths.get(pathKey));
           }
-          paths.put(path, rd);
+          paths.put(pathKey, rd);
         }
       }
     }

@@ -43,6 +43,11 @@ public class MyBookApi {
     return Arrays.asList(bookTitles);
   }
 
+  @POST @Path(v1BookGenre)
+  public List<String> v1BookGenreUpdateTitles(@QueryParam("genre") String genre, @QueryParam("titleCount") int titleCount) {
+    return Arrays.asList(bookTitles);
+  }
+
   @GET @Path(v1BookCatalog)
   public List<String> v1BookCatalog(@HeaderParam("catalogIds") List<Integer> catalogIds) {
     return Arrays.asList(bookTitles);
