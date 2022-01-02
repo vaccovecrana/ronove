@@ -4,6 +4,8 @@ import io.undertow.server.*;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -85,12 +87,13 @@ public class RvUndertowAdapter<Controller> {
             }
             return rvd.handler.invoke(controller, params);
           } catch (Exception e) {
-            if (e instanceof RvException.RvApplicationException) {
-              throw (RvException.RvApplicationException) e;
+            if (e instanceof InvocationTargetException) {
+              InvocationTargetException ie = (InvocationTargetException) e;
+              if (ie.getTargetException() instanceof RvException.RvApplicationException) {
+                throw (RvException.RvApplicationException) ie.getCause();
+              }
             }
-            else {
-              throw new RvException.RvApplicationException(e, null, null);
-            }
+            throw new RvException.RvApplicationException(e, null, null);
           }
         }, rvd.httpStatus != null ? rvd.httpStatus.value().getStatusCode() : StatusCodes.OK),
         rvd, blockingHandlerCustomizer

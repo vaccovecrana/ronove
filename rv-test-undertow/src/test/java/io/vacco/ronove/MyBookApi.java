@@ -1,6 +1,7 @@
 package io.vacco.ronove;
 
 import io.vacco.ronove.core.RvAttachmentParam;
+import io.vacco.ronove.core.RvException;
 import io.vacco.ronove.core.RvStatus;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -56,7 +57,10 @@ public class MyBookApi {
   @PATCH @Path(v1GenreUpdate)
   @RvStatus(Response.Status.NO_CONTENT)
   public void v1GenreUpdate(@BeanParam List<String> genreUpdates) {
-    throw new IllegalStateException("This error should be handled by a blocking customizer.");
+    throw new RvException.RvApplicationException(
+        new IllegalStateException("This error should be handled by a blocking customizer."),
+        Response.Status.BAD_REQUEST, new int[] {1, 2, 3, 4, 5}
+    );
   }
 
   @GET @Path(v1Me)
