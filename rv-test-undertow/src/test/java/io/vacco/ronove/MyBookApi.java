@@ -56,7 +56,7 @@ public class MyBookApi {
   @PATCH @Path(v1GenreUpdate)
   @RvStatus(Response.Status.NO_CONTENT)
   public void v1GenreUpdate(@BeanParam List<String> genreUpdates) {
-    System.out.println("Lol updated");
+    throw new IllegalStateException("This error should be handled by a blocking customizer.");
   }
 
   @GET @Path(v1Me)

@@ -3,6 +3,7 @@ package io.vacco.ronove;
 import com.google.gson.Gson;
 import io.undertow.*;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 import io.vacco.ronove.undertow.*;
@@ -31,8 +32,14 @@ public class RvUndertowAdapterSpec {
         MyBookApi bookApi = new MyBookApi();
         RvJsonInput jIn = g::fromJson;
         RvJsonOutput jOut = g::toJson;
+        HttpHandler errorHdl = forError(jOut, (xc, t) -> {
+          if (t != null) {
+            t.printStackTrace();
+          }
+          return t != null ? t.getMessage() : "???";
+        });
 
-        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<MyBookApi>(bookApi, jIn, jOut)
+        RvUndertowAdapter<MyBookApi> utBookApi = new RvUndertowAdapter<>(bookApi, jIn, jOut)
             .withAttachmentProcessor((ex, clazz) -> {
               // Perform some sort of authentication in a parent handler, place a derived object, and retrieve it here.
               // This is just a quick example.
@@ -45,14 +52,9 @@ public class RvUndertowAdapterSpec {
                 return ex.getAttachment(uk);
               }
               return null;
-            });
-
-        HttpHandler errorHdl = forError(jOut, (xc, t) -> {
-          if (t != null) {
-            t.printStackTrace();
-          }
-          return t != null ? t.getMessage() : "???";
-        });
+            }).withBlockingHandlerCustomizer(hdl -> new BlockingHandler(
+                Handlers.exceptionHandler(hdl).addExceptionHandler(Exception.class, errorHdl))
+            );
         HttpHandler notFoundHdl = forJson(jOut, ex -> StatusCodes.NOT_FOUND_STRING, StatusCodes.NOT_FOUND);
         Undertow server =
             Undertow.builder()
@@ -60,7 +62,7 @@ public class RvUndertowAdapterSpec {
                 .setHandler(
                     Handlers.exceptionHandler(
                         forLogging(
-                            utBookApi.routingHandler
+                            utBookApi.build()
                                 .setFallbackHandler(notFoundHdl)
                                 .setInvalidMethodHandler(notFoundHdl),
                             ex -> System.out.println(ex.toString())

@@ -1,36 +1,42 @@
 package io.vacco.ronove.undertow;
 
 import io.undertow.server.*;
+import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static io.vacco.ronove.undertow.RvHandlers.*;
 import static java.lang.String.format;
 
 public class RvUndertowAdapter<Controller> {
 
-  public final RoutingHandler routingHandler = new RoutingHandler();
-
+  private final RoutingHandler routingHandler = new RoutingHandler();
   private final RvJsonInput jIn;
   private final RvJsonOutput jOut;
   private final Controller controller;
 
   private BiFunction<HttpServerExchange, Class<?>, Object> attachmentFn;
+  private Function<HttpHandler, BlockingHandler> blockingHandlerCustomizer;
 
   public RvUndertowAdapter(Controller c, RvJsonInput jIn, RvJsonOutput jOut) {
     this.jIn = Objects.requireNonNull(jIn);
     this.jOut = Objects.requireNonNull(jOut);
     this.controller = Objects.requireNonNull(c);
-    Map<String, RvDescriptor> idx = new RvContext().describe(c.getClass());
+  }
+
+  public RoutingHandler build() {
+    Map<String, RvDescriptor> idx = new RvContext().describe(controller.getClass());
     for (RvDescriptor d : idx.values()) {
       routingHandler.add(d.httpMethodTxt, d.path.value(), forDescriptor(d));
     }
+    return routingHandler;
   }
 
-  private HttpHandler wrap(HttpHandler rvh, RvDescriptor rvd) {
-    return rvd.beanParam != null ? forBlocking(rvh) : rvh;
+  private HttpHandler wrap(HttpHandler rvh, RvDescriptor rvd, Function<HttpHandler, BlockingHandler> customizer) {
+    return rvd.beanParam != null ? forBlocking(rvh, customizer) : rvh;
   }
 
   private Object extract(Map<String, Deque<String>> pMap, RvParameter p) {
@@ -86,12 +92,18 @@ public class RvUndertowAdapter<Controller> {
               throw new RvException.RvApplicationException(e);
             }
           }
-        }, rvd.httpStatus != null ? rvd.httpStatus.value().getStatusCode() : StatusCodes.OK), rvd
+        }, rvd.httpStatus != null ? rvd.httpStatus.value().getStatusCode() : StatusCodes.OK),
+        rvd, blockingHandlerCustomizer
     );
   }
 
   public RvUndertowAdapter<Controller> withAttachmentProcessor(BiFunction<HttpServerExchange, Class<?>, Object> attachmentFn) {
     this.attachmentFn = attachmentFn;
+    return this;
+  }
+
+  public RvUndertowAdapter<Controller> withBlockingHandlerCustomizer(Function<HttpHandler, BlockingHandler> customizer) {
+    this.blockingHandlerCustomizer = customizer;
     return this;
   }
 

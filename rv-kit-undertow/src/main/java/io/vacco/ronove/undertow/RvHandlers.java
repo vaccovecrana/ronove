@@ -5,7 +5,6 @@ import io.undertow.server.handlers.*;
 import io.undertow.util.*;
 import io.vacco.ronove.core.*;
 import jakarta.ws.rs.core.MediaType;
-
 import java.io.*;
 import java.util.function.*;
 
@@ -18,7 +17,10 @@ public class RvHandlers {
     };
   }
 
-  public static HttpHandler forBlocking(HttpHandler hdl) {
+  public static HttpHandler forBlocking(HttpHandler hdl, Function<HttpHandler, BlockingHandler> customizer) {
+    if (customizer != null) {
+      return customizer.apply(hdl);
+    }
     return new BlockingHandler(hdl);
   }
 
