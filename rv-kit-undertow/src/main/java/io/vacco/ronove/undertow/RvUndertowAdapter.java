@@ -89,7 +89,7 @@ public class RvUndertowAdapter<Controller> {
               throw (RvException.RvApplicationException) e;
             }
             else {
-              throw new RvException.RvApplicationException(e);
+              throw new RvException.RvApplicationException(e, null, null);
             }
           }
         }, rvd.httpStatus != null ? rvd.httpStatus.value().getStatusCode() : StatusCodes.OK),

@@ -24,15 +24,14 @@ public class RvException {
 
     public static final long serialVersionUID = 1;
     public final Response.Status status;
+    public final Object errorData;
 
-    public RvApplicationException(Throwable cause, Response.Status status) {
+    public RvApplicationException(Throwable cause, Response.Status status, Object errorData) {
       super(cause);
       this.status = status == null ? Response.Status.INTERNAL_SERVER_ERROR : status;
+      this.errorData = errorData;
     }
 
-    public RvApplicationException(Throwable cause) {
-      this(cause, Response.Status.INTERNAL_SERVER_ERROR);
-    }
   }
 
 }
