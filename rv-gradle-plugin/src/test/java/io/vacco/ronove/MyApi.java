@@ -59,4 +59,23 @@ public class MyApi {
     return OzReply.asOk(res);
   }
 
+  @GET @Path("/v1/pair")
+  public MyPair<Integer, String> v1Pair(@QueryParam("pairId") Integer pairId) {
+    var p = new MyPair<Integer, String>();
+    p.key = pairId;
+    p.val = "Juno";
+    return p;
+  }
+
+  @GET @Path("/v1/pair/list")
+  public List<MyPair<Integer, String>> v1PairList() {
+    var p0 = new MyPair<Integer, String>();
+    var p1 = new MyPair<Integer, String>();
+    p0.key = 1;
+    p0.val = "Juno";
+    p1.key = 2;
+    p1.val = "Golf";
+    return List.of(p0, p1);
+  }
+
 }

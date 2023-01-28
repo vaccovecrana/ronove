@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.math.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.*;
 
 public class RvTypescriptFactory {
 
@@ -50,9 +53,9 @@ public class RvTypescriptFactory {
     if (t instanceof Class) {
       return Optional.of((Class<?>) t);
     } else if (t instanceof ParameterizedType) {
-      ParameterizedType pt = (ParameterizedType) t;
+      var pt = (ParameterizedType) t;
       if (pt.getRawType() instanceof Class) {
-        Class<?> prc = (Class<?>) pt.getRawType();
+        var prc = (Class<?>) pt.getRawType();
         if (!Collection.class.isAssignableFrom(prc)) {
           return Optional.of(prc);
         }
@@ -62,19 +65,20 @@ public class RvTypescriptFactory {
   }
 
   public String simpleNameOf(String canonicalName) {
-    String[] classComps = canonicalName.split("\\.");
+    var classComps = canonicalName.split("\\.");
     return classComps[classComps.length - 1];
   }
 
   public String simpleNameOf(Type t) {
-    String rawClass = t instanceof ParameterizedType ?
-        ((ParameterizedType) t).getRawType().getTypeName() : t.getTypeName();
+    var rawClass = t instanceof ParameterizedType
+      ? ((ParameterizedType) t).getRawType().getTypeName()
+      : t.getTypeName();
     getSchemaClass(t).ifPresent(cl -> tsSchemaTypes.add(simpleNameOf(cl.getCanonicalName())));
     return simpleNameOf(rawClass);
   }
 
   public String tsTypeFormatOf(ParameterizedType t) {
-    String rawClass = simpleNameOf(t);
+    var rawClass = simpleNameOf(t);
     if (List.class.getSimpleName().equals(rawClass) || Set.class.getSimpleName().equals(rawClass)) {
       return "%s[]";
     }
@@ -82,28 +86,31 @@ public class RvTypescriptFactory {
   }
 
   public String tsTypeOf(Type t) {
-    Class<?> tClass = (Class<?>) t;
-    String tClassTsType = tsTypes.get(t.getTypeName());
+    var tClass = (Class<?>) t;
+    var tClassTsType = tsTypes.get(t.getTypeName());
     if (tClass.isArray()) {
-      Class<?> aClass = tClass.getComponentType();
-      String aClassTsType = tsTypes.get(aClass.getTypeName());
+      var aClass = tClass.getComponentType();
+      var aClassTsType = tsTypes.get(aClass.getTypeName());
       return String.format("%s[]", aClassTsType);
     }
     return tClassTsType != null ? tClassTsType : simpleNameOf(t);
   }
 
   public String tsArgsOf(ParameterizedType opType) {
-    String opTypeFmt = tsTypeFormatOf(opType);
-    Type tType = opType.getActualTypeArguments()[0];
-    return String.format(opTypeFmt,
-        tType instanceof ParameterizedType ?
-            tsArgsOf((ParameterizedType) tType) : tsTypeOf(tType)
-    );
+    var opTypeFmt = tsTypeFormatOf(opType);
+    var tType = stream(opType.getActualTypeArguments())
+      .map(jt -> jt instanceof ParameterizedType
+        ? tsArgsOf((ParameterizedType) jt)
+        : tsTypeOf(jt)
+      ).collect(Collectors.joining(", "));
+    return String.format(opTypeFmt, tType);
   }
 
   public String tsReturnTypeOf(Method m) {
-    Type rt = m.getGenericReturnType();
-    return rt instanceof ParameterizedType ? tsArgsOf((ParameterizedType) rt) : tsTypeOf(rt);
+    var rt = m.getGenericReturnType();
+    return rt instanceof ParameterizedType
+      ? tsArgsOf((ParameterizedType) rt)
+      : tsTypeOf(rt);
   }
 
 }
