@@ -6,8 +6,8 @@ import {
   {{tsSchemaTypes}}
 } from "./schema"
 {{end}}
-const doJsonIo = <I, O>(url: string, method: string, mediaType: string,
-                        body: I, headers: Map<string, string>): Promise<O> => {
+const doJsonIo = <I, O>(url: string, method: string, body: I,
+                        headers: Map<string, string>, mediaType?: string): Promise<O> => {
   const options: any = {method, headers: {}}
   if (mediaType) {
     options.headers["Content-Type"] = mediaType
@@ -46,7 +46,7 @@ export const {{rvd.javaMethod.getName()}} = ({{rvd.paramsTsList}}): Promise<{{rv
   {{if !rvd.headerParams.isEmpty()}}
     const headers = new Map<string, string>()
     {{for hp in rvd.headerParams}}
-      headers.set("{{hp.name}}", {{hp.name}})){{"\n  "}}
+      headers.set("{{hp.name}}", {{hp.name}}){{"\n  "}}
     {{end}}
   {{end}}
   {{if !rvd.formParams.isEmpty()}}
@@ -56,15 +56,15 @@ export const {{rvd.javaMethod.getName()}} = ({{rvd.paramsTsList}}): Promise<{{rv
     {{end}}
   {{end}}
   return doJsonIo(path, "{{rvd.httpMethodTxt}}",
-    {{if rvd.consumes != null}}"{{rvd.consumes.value()[0]}}"{{else}}undefined{{end}},
     {{if rvd.beanParam != null}}
       JSON.stringify({{rvd.beanParam.name}})
     {{elseif !rvd.formParams.isEmpty()}}
-      new URLSearchParams(formData)
+      new URLSearchParams(formData as any)
     {{else}}
       undefined
     {{end}},
-    {{if !rvd.headerParams.isEmpty()}}headers{{else}}new Map(){{end}}
+    {{if !rvd.headerParams.isEmpty()}}headers{{else}}new Map(){{end}},
+    {{if rvd.consumes != null}}"{{rvd.consumes.value()[0]}}"{{else}}undefined{{end}}
   )
 }
 {{end}}
