@@ -6,12 +6,14 @@ import {
   {{tsSchemaTypes}}
 } from "./schema"
 {{end}}
-const doJsonIo = <I, O>(url: string, method: string, body: I,
-                        headers: Map<string, string>): Promise<O> => {
+const doJsonIo = <I, O>(url: string, method: string, mediaType: string,
+                        body: I, headers: Map<string, string>): Promise<O> => {
   const options: any = {method, headers: {}}
+  if (mediaType) {
+    options.headers["Content-Type"] = mediaType
+  }
   if (body) {
-    options.headers["Content-Type"] = "application/json"
-    options.body = JSON.stringify(body)
+    options.body = body
   }
   headers.forEach((v, k) => options.headers[k] = v)
   return fetch(url, options)
@@ -29,18 +31,40 @@ Source controllers:
 {{for ctl in rvControllers}}- {{ctl}}{{"\n"}}{{end}}
  */
 {{for rvd in rvDescriptors}}
-export const {{rvd.handler.getName()}} = ({{rvd.paramsTsList}}): Promise<{{rvd.responseTsType}}> => {
+export const {{rvd.javaMethod.getName()}} = ({{rvd.paramsTsList}}): Promise<{{rvd.responseTsType}}> => {
   let path = "{{rvd.path.value()}}"
-  {{for pp in rvd.pathParams}}path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}{{end}}
+  {{for pp in rvd.pathParams}}
+    path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}
+  {{end}}
   {{if !rvd.queryParams.isEmpty()}}
-  const qParams = new URLSearchParams()
-  {{for qp in rvd.queryParams}}qParams.append("{{qp.name}}", {{qp.name}}.toString()){{"\n  "}}{{end}}
-  path = `${path}?${qParams.toString()}`
+    const qParams = new URLSearchParams()
+    {{for qp in rvd.queryParams}}
+      qParams.append("{{qp.name}}", {{qp.name}}.toString()){{"\n  "}}
+    {{end}}
+    path = `${path}?${qParams.toString()}`
   {{end}}
   {{if !rvd.headerParams.isEmpty()}}
-  const headers = new Map<string, string>()
-  {{for hp in rvd.headerParams}}headers.set("{{hp.name}}", {{if hp.tsType.equals("string")}}{{hp.name}}{{else}}JSON.stringify({{hp.name}}){{end}}){{"\n  "}}{{end}}
+    const headers = new Map<string, string>()
+    {{for hp in rvd.headerParams}}
+      headers.set("{{hp.name}}", {{hp.name}})){{"\n  "}}
+    {{end}}
   {{end}}
-  return doJsonIo(path, "{{rvd.httpMethodTxt}}", {{if rvd.beanParam != null}}body{{else}}undefined{{end}}, {{if !rvd.headerParams.isEmpty()}}headers{{else}}new Map(){{end}})
+  {{if !rvd.formParams.isEmpty()}}
+    const formData = new FormData();
+    {{for fp in rvd.formParams}}
+      formData.append("{{fp.name}}", {{fp.name}});
+    {{end}}
+  {{end}}
+  return doJsonIo(path, "{{rvd.httpMethodTxt}}",
+    {{if rvd.consumes != null}}"{{rvd.consumes.value()[0]}}"{{else}}undefined{{end}},
+    {{if rvd.beanParam != null}}
+      JSON.stringify({{rvd.beanParam.name}})
+    {{elseif !rvd.formParams.isEmpty()}}
+      new URLSearchParams(formData)
+    {{else}}
+      undefined
+    {{end}},
+    {{if !rvd.headerParams.isEmpty()}}headers{{else}}new Map(){{end}}
+  )
 }
 {{end}}

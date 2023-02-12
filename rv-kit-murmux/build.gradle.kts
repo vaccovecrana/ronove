@@ -4,5 +4,5 @@ val api by configurations
 
 dependencies {
   api(project(":rv-core"))
-  implementation("io.undertow:undertow-core:2.3.3.Final")
+  implementation("io.vacco.murmux:murmux:2.2.0")
 }

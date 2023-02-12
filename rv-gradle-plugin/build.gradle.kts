@@ -3,9 +3,8 @@ configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(true, f
 dependencies {
   implementation(gradleApi())
   implementation(project(":rv-core"))
-  implementation("cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.26.723")
+  implementation("cz.habarta.typescript-generator:typescript-generator-gradle-plugin:3.1.1185")
   implementation("io.marioslab.basis:template:1.7")
-  implementation("io.vacco.oruzka:oruzka:0.1.4")
 }
 
 configurations.all {
