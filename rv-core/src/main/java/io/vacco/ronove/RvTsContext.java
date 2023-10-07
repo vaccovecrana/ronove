@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.*;
 
-public class RvTypescript {
+public class RvTsContext {
 
   private static final String any = "any";
   private static final String tVoid = "void";
@@ -17,7 +17,6 @@ public class RvTypescript {
   private static final String string = "string";
   private static final String date = "Date";
 
-  public final Set<String> tsSchemaTypes = new TreeSet<>();
   public final Set<Type> javaTypes = new HashSet<>();
 
   private static final Map<Serializable, String> tsTypes = new HashMap<>();
@@ -58,14 +57,12 @@ public class RvTypescript {
       if (void.class.isAssignableFrom((Class<?>) t) || Void.class.isAssignableFrom((Class<?>) t)) {
         return Optional.empty();
       }
-      javaTypes.add(t);
       return Optional.of((Class<?>) t);
     } else if (t instanceof ParameterizedType) {
       var pt = (ParameterizedType) t;
       if (pt.getRawType() instanceof Class) {
         var prc = (Class<?>) pt.getRawType();
         if (!Collection.class.isAssignableFrom(prc)) {
-          javaTypes.add(prc);
           return Optional.of(prc);
         }
       }
@@ -82,7 +79,7 @@ public class RvTypescript {
     var rawClass = t instanceof ParameterizedType
       ? ((ParameterizedType) t).getRawType().getTypeName()
       : t.getTypeName();
-    getSchemaClass(t).ifPresent(cl -> tsSchemaTypes.add(simpleNameOf(cl.getCanonicalName())));
+    getSchemaClass(t).ifPresent(javaTypes::add);
     return simpleNameOf(rawClass);
   }
 
@@ -131,6 +128,23 @@ public class RvTypescript {
       }
     }
     return tsReturnTypeTail(rt);
+  }
+
+  @SuppressWarnings("rawtypes")
+  public RvTsType mapJavaType(Type jt) {
+    if (jt instanceof Class) {
+      Class cl = (Class) jt;
+      System.out.println("class, now wat?");
+    } else if (jt instanceof ParameterizedType) {
+      System.out.println("Generic, now wat?");
+    }
+    return null;
+  }
+
+  public List<RvTsType> tsSchemaTypes() {
+    return javaTypes.stream()
+        .map(this::mapJavaType)
+        .collect(Collectors.toList());
   }
 
 }

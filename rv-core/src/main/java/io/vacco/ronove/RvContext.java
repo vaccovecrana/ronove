@@ -12,7 +12,7 @@ import static java.lang.String.format;
 public class RvContext {
 
   public final Map<String, RvDescriptor> paths = new TreeMap<>();
-  public final RvTypescript tsFactory = new RvTypescript();
+  public final RvTsContext tsCtx = new RvTsContext();
 
   public RvParameter describe(Parameter p, int position) throws Exception {
     var rp = new RvParameter();
@@ -26,8 +26,8 @@ public class RvContext {
     rp.name = pName;
     rp.type = t;
     rp.tsType = t instanceof ParameterizedType
-      ? tsFactory.tsArgsOf((ParameterizedType) t)
-      : tsFactory.tsTypeOf(t);
+      ? tsCtx.tsArgsOf((ParameterizedType) t)
+      : tsCtx.tsTypeOf(t);
     defaultValueOf(p).ifPresent(dv -> rp.defaultValue = dv);
     return rp;
   }
@@ -41,7 +41,7 @@ public class RvContext {
       var d = new RvDescriptor();
       d.path = p;
       d.javaMethod = m;
-      d.responseTsType = tsFactory.tsReturnTypeOf(m);
+      d.responseTsType = tsCtx.tsReturnTypeOf(m);
       d.httpStatus = rvStatus;
       d.consumes = jxRsConsumes;
       d.produces = jxRsProduces;

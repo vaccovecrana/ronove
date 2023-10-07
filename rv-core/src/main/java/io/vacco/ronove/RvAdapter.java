@@ -61,10 +61,10 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
     );
   }
 
-  private Object valueOrDefault(RvParameter p, String s) {
-    if (s != null) {
+  private Object valueOrDefault(RvParameter p, String rawValue) {
+    if (rawValue != null) {
       return RvPrimitives
-        .instance((Class<?>) p.type, s)
+        .instance((Class<?>) p.type, rawValue)
         .orElse(null);
     } else if (p.defaultValue != null) {
       return RvPrimitives.instance(

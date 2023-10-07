@@ -20,7 +20,7 @@ public class RvTypescriptGen {
 
     context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
     context.set("rvDescriptors", idx.values());
-    context.set("tsSchemaTypes", String.join(", ", ctx.tsFactory.tsSchemaTypes));
+    context.set("tsSchemaTypes", ctx.tsCtx.tsSchemaTypes());
 
     return template.render(context);
   }

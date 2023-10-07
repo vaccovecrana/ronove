@@ -24,11 +24,7 @@ public class RvMxAdapterTest {
       var jIn = (RvJsonInput) g::fromJson;
       var jOut = (RvJsonOutput) g::toJson;
       var sesHdl = new MxMySession();
-      var mxBookApi = new RvMxAdapter<>(
-        new MyApi(),
-        (xc, e) -> log.error("Err", e),
-        jIn, jOut
-      ).build();
+      var mxBookApi = new RvMxAdapter<>(new MyApi(), (xc, e) -> log.error("Err", e), jIn, jOut).build();
       mx = new Murmux().rootHandler(xc -> {
         log.info("[{}] {}", xc.method, xc.getPath());
         sesHdl.handle(xc);
