@@ -1,6 +1,5 @@
 package io.vacco.ronove.myapi;
 
-import io.vacco.oruzka.core.*;
 import io.vacco.ronove.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -35,19 +34,19 @@ public class MyApi {
   }
 
   @GET @Path(v1ApiEcho)
-  public OzReply<Integer> getSomeEchoFn(@PathParam("someNumber") int someNumber,
+  public MyReply<Integer> getSomeEchoFn(@PathParam("someNumber") int someNumber,
                                         @RvAttachmentParam(MyUser.class) MyUser me) {
     System.out.printf("You are: [%s]%n", requireNonNull(me));
-    return OzReply.asOk(someNumber);
+    return MyReply.ok(someNumber);
   }
 
   @GET @Path(v1ApiOptions)
-  public OzReply<List<MyOpts>> getApiOpts() {
-    return OzReply.asOk(Arrays.asList(MyOpts.values()));
+  public MyReply<List<MyOpts>> getApiOpts() {
+    return MyReply.ok(Arrays.asList(MyOpts.values()));
   }
 
   @GET @Path(v1BlogOptions)
-  public RvResponse<OzReply<List<MyBlogEntry>>> getBlogsByOption(@QueryParam("anOption") MyOpts anOption,
+  public RvResponse<MyReply<List<MyBlogEntry>>> getBlogsByOption(@QueryParam("anOption") MyOpts anOption,
                                                                  @QueryParam("sort") @DefaultValue("asc") String sort) {
     requireNonNull(anOption);
 
@@ -61,19 +60,19 @@ public class MyApi {
     e1.text = "And this is some other blog content text";
     e1.tags = new LinkedHashSet<>(Arrays.asList("cats", "dogs", "funny"));
 
-    return new RvResponse<OzReply<List<MyBlogEntry>>>()
+    return new RvResponse<MyReply<List<MyBlogEntry>>>()
       .withStatus(Response.Status.OK)
       .withMediaType(MediaType.APPLICATION_JSON)
-      .withBody(OzReply.asOk(Arrays.asList(e0, e1)));
+      .withBody(MyReply.ok(Arrays.asList(e0, e1)));
   }
 
   @GET @Path(v1Blog)
-  public OzReply<MyBlogEntry> getBlogPost(@QueryParam("blogId") long blogId) {
+  public MyReply<MyBlogEntry> getBlogPost(@QueryParam("blogId") long blogId) {
     var e = new MyBlogEntry();
     e.bid = blogId;
     e.text = "This is some blog content text";
     e.tags = new LinkedHashSet<>(Arrays.asList("food", "travel", "money"));
-    return OzReply.asOk(e);
+    return MyReply.ok(e);
   }
 
   @PATCH @Path(v1BlogTagsUpdate)

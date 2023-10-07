@@ -1,15 +1,18 @@
 package io.vacco.ronove.badapi;
 
-import io.vacco.oruzka.core.OzReply;
 import io.vacco.ronove.myapi.MyBlogEntry;
+import io.vacco.ronove.myapi.MyPair;
 import jakarta.ws.rs.*;
 
 public class BadApis {
 
   public static class BadApi00 {
     @GET @Path("/v1/echo/{id}")
-    public OzReply<Integer> bad00(@PathParam("someId") int someId) {
-      return OzReply.asOk(someId);
+    public MyPair<Integer, String> bad00(@PathParam("someId") int someId) {
+      var p = new MyPair<Integer, String>();
+      p.key = 0;
+      p.val = "test";
+      return p;
     }
   }
 

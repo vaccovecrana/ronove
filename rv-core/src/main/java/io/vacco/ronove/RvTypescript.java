@@ -18,6 +18,7 @@ public class RvTypescript {
   private static final String date = "Date";
 
   public final Set<String> tsSchemaTypes = new TreeSet<>();
+  public final Set<Type> javaTypes = new HashSet<>();
 
   private static final Map<Serializable, String> tsTypes = new HashMap<>();
 
@@ -57,12 +58,14 @@ public class RvTypescript {
       if (void.class.isAssignableFrom((Class<?>) t) || Void.class.isAssignableFrom((Class<?>) t)) {
         return Optional.empty();
       }
+      javaTypes.add(t);
       return Optional.of((Class<?>) t);
     } else if (t instanceof ParameterizedType) {
       var pt = (ParameterizedType) t;
       if (pt.getRawType() instanceof Class) {
         var prc = (Class<?>) pt.getRawType();
         if (!Collection.class.isAssignableFrom(prc)) {
+          javaTypes.add(prc);
           return Optional.of(prc);
         }
       }

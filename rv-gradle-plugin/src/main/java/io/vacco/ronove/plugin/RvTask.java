@@ -1,6 +1,6 @@
 package io.vacco.ronove.plugin;
 
-import io.github.classgraph.*;
+import io.github.classgraph.ClassGraph;
 import org.gradle.api.*;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.TaskAction;
