@@ -2,8 +2,6 @@
 /* ======== Generated file - do not modify directly ======== */
 /* ========================================================= */
 
-// TODO render captured TS types collected
-
 const doJsonIo = <I, O>(url: string, method: string, body: I,
                         headers: Map<string, string>, mediaType?: string): Promise<O> => {
   const options: any = {method, headers: {}}
@@ -23,7 +21,10 @@ const doJsonIo = <I, O>(url: string, method: string, body: I,
 /* ============= RPC types ============== */
 /* ====================================== */
 {{for tsType in tsSchemaTypes}}
-
+export {{tsType.type}} {{tsType.name}} {
+  {{for prop in tsType.properties}}{{prop.name}}: {{prop.type}}{{";\n  "}}{{end}}
+  {{for enumVal in tsType.enumValues}}{{enumVal}} = "{{enumVal}}",{{"\n  "}}{{end}}
+}
 {{end}}
 
 /* ====================================== */

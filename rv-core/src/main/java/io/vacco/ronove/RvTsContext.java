@@ -136,7 +136,7 @@ public class RvTsContext {
   private RvTsType mapEnum(Class<?> jc) {
     var tse = new RvTsType();
     tse.name = jc.getSimpleName();
-    tse.type = "enum";
+    tse.type = "const enum";
     for (var ec : jc.getEnumConstants()) {
       tse.enumValues.add(ec.toString());
     }
