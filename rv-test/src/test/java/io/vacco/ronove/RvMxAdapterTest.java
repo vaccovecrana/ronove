@@ -34,6 +34,7 @@ public class RvMxAdapterTest {
 
     it("Can serve an API using Murmux", () -> {
       if (mx != null) {
+        Thread.sleep(5000);
         RvRequestRunner.go();
       }
     });
