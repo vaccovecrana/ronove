@@ -113,6 +113,9 @@ public class RvTsContext {
   }
 
   private String tsReturnTypeTail(Type rt) {
+    if (rt instanceof TypeVariable) {
+      return rt.getTypeName();
+    }
     return rt instanceof ParameterizedType
       ? tsArgsOf((ParameterizedType) rt)
       : tsTypeOf(rt);
@@ -130,15 +133,48 @@ public class RvTsContext {
     return tsReturnTypeTail(rt);
   }
 
+  private RvTsType mapEnum(Class<?> jc) {
+    var tse = new RvTsType();
+    tse.name = jc.getSimpleName();
+    tse.type = "enum";
+    for (var ec : jc.getEnumConstants()) {
+      tse.enumValues.add(ec.toString());
+    }
+    return tse;
+  }
+
+  private RvTsType mapClass(Class<?> jc) {
+    var tsc = new RvTsType();
+    tsc.type = "interface";
+    tsc.name = jc.getSimpleName();
+    if (jc.getTypeParameters().length > 0) {
+      tsc.name = String.format(
+          "%s<%s>", tsc.name,
+          Arrays.stream(jc.getTypeParameters())
+              .map(Object::toString)
+              .collect(Collectors.joining(", "))
+      );
+    }
+    for (var f : jc.getFields()) {
+      var gt = f.getGenericType();
+      var ft = (gt instanceof ParameterizedType || gt instanceof TypeVariable)
+          ? f.getGenericType()
+          : f.getType();
+      var prop = new RvTsType();
+      prop.name = f.getName();
+      prop.type = tsReturnTypeTail(ft);
+      tsc.properties.add(prop);
+    }
+    return tsc;
+  }
+
   @SuppressWarnings("rawtypes")
   public RvTsType mapJavaType(Type jt) {
     if (jt instanceof Class) {
       Class cl = (Class) jt;
-      System.out.println("class, now wat?");
-    } else if (jt instanceof ParameterizedType) {
-      System.out.println("Generic, now wat?");
+      return cl.isEnum() ? mapEnum(cl) : mapClass(cl);
     }
-    return null;
+    throw new IllegalArgumentException("Unsupported type " + jt);
   }
 
   public List<RvTsType> tsSchemaTypes() {
