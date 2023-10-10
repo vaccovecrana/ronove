@@ -4,14 +4,15 @@
 
 It provides:
 
-- Typescript RPC stubs through [typescript-generator-gradle-plugin](https://github.com/vojtechhabarta/typescript-generator).
+- Typescript RPC stubs defined by Jakarta RESTful annotated controllers.
 - Server adapters for [Jakarta RESTful Web Services](https://jakarta.ee/specifications/restful-ws/3.0/jakarta-restful-ws-spec-3.0.html)
 - Supplemental annotations for web controller method definitions.
 
 Opinionated choices:
 
-- Query parameters only support single key/value definitions.
-- Things like list query parameters in `GET` request are best sent as header parameters.
+- DTOs defined as Controller parameters do not support inheritance (to keep code generation simple).
+
+See examples at [rv-test](./rv-test/src/test/java/io/vacco/ronove).
 
 TODO
 
