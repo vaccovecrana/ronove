@@ -1,8 +1,10 @@
 configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(true, false) }
 
 val api by configurations
+val murmuxVer = "2.2.2"
+version = murmuxVer
 
 dependencies {
   api(project(":rv-core"))
-  implementation("io.vacco.murmux:murmux:2.2.0")
+  api("io.vacco.murmux:murmux:${murmuxVer}")
 }
