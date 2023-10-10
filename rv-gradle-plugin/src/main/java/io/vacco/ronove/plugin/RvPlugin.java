@@ -12,12 +12,11 @@ public class RvPlugin implements Plugin<Project> {
     project.getExtensions().create("ronove", RvPluginExtension.class, project);
 
     var classes = project.getTasks().getByName("classes");
-    var generateTypeScript = project.getTasks().getByName("generateTypeScript");
     var rvTsRpc = project.getTasks().create("ronoveTypescriptRpc", RvTask.class);
 
     rvTsRpc.setGroup("build");
     rvTsRpc.setDescription("Generates TS schema and RPC call stubs for jax-rs annotated controllers");
-    rvTsRpc.dependsOn(classes, generateTypeScript);
+    rvTsRpc.dependsOn(classes);
   }
 
 }

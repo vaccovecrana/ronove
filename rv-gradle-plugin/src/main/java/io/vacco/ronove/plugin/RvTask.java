@@ -32,7 +32,7 @@ public class RvTask extends DefaultTask {
           .overrideClassLoaders(ucl);
       String tsSrc;
       try (var scanResult = cg.scan()) {
-        tsSrc = new RvTypescriptGen().render(scanResult.getAllClasses().loadClasses());
+        tsSrc = new RvTsGen().render(scanResult.getAllClasses().loadClasses());
       }
       Files.write(ext.outFile.get().getAsFile().toPath(), tsSrc.getBytes(StandardCharsets.UTF_8));
     }

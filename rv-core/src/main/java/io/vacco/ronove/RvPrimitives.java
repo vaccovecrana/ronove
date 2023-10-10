@@ -1,6 +1,7 @@
 package io.vacco.ronove;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 public class RvPrimitives {
@@ -29,9 +30,24 @@ public class RvPrimitives {
       || type == Float.class;
   }
 
-  public static boolean isPrimitiveOrWrapper(final Class<?> type) {
-    if (type == null) { return false; }
-    return type.isPrimitive() || isWrapperType(toWrapperClass(type));
+  public static boolean isPrimitiveOrWrapper(Class<?> clazz) {
+    if (clazz == null) { return false; }
+    return clazz.isPrimitive() || isWrapperType(toWrapperClass(clazz));
+  }
+
+  public static boolean isCollection(Class<?> clazz) {
+    if (clazz == null) { return false; }
+    return Collection.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isVoid(Class<?> clazz) {
+    if (clazz == null) { return false; }
+    return void.class.isAssignableFrom(clazz) || Void.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isString(Class<?> clazz) {
+    if (clazz == null) { return false; }
+    return String.class.isAssignableFrom(clazz);
   }
 
   public static Optional<Object> instance(Class<?> fType, String rawValue) {
