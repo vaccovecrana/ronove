@@ -37,7 +37,7 @@ Source controllers:
 {{for ctl in rvControllers}}- {{ctl}}{{"\n"}}{{end}}
  */
 {{for rvd in rvDescriptors}}
-export const {{rvd.javaMethod.getName()}} = ({{declList.apply(rvd)}}): Promise<{{decl.apply(rvd.responseType)}}> => {
+export const {{rvd.javaMethod.getName()}} = ({{paramFn.apply(rvd)}}): Promise<{{retFn.apply(rvd.responseType)}}> => {
   let path = "{{rvd.path.value()}}"
   {{for pp in rvd.pathParams}}
     path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}

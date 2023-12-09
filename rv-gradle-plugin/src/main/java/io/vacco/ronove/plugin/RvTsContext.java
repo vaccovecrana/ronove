@@ -54,19 +54,19 @@ public class RvTsContext {
 
   private RvTsType map(Type t) {
     if (t instanceof TypeVariable) {
-      return new RvTsType(null, mapTail(t));
+      return new RvTsType(null, mapReturn(t));
     } else if (t instanceof Class) {
       var c = (Class<?>) t;
       if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c) || isCollection(c) || c.isArray()) {
-        return new RvTsType(null, mapTail(c));
+        return new RvTsType(null, mapReturn(c));
       } else if (c.isEnum()) {
-        var tse = new RvTsType(c.getSimpleName(), mapTail(c));
+        var tse = new RvTsType(c.getSimpleName(), mapReturn(c));
         for (var ec : c.getEnumConstants()) {
           tse.enumValues.add(ec.toString());
         }
         return tse;
       } else {
-        var ts = new RvTsType(c.getSimpleName(), mapTail(c));
+        var ts = new RvTsType(c.getSimpleName(), mapReturn(c));
         for (var f : c.getFields()) {
           var fts = map(f.getGenericType()).withName(f.getName());
           ts.properties.add(fts);
@@ -74,7 +74,7 @@ public class RvTsContext {
         return ts;
       }
     } else if (t instanceof ParameterizedType) {
-      return new RvTsType(null, mapTail(t));
+      return new RvTsType(null, mapReturn(t));
     }
     throw new IllegalStateException(
         format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
@@ -82,20 +82,24 @@ public class RvTsContext {
   }
 
   public List<RvTsType> schemaTypes() {
-    return types.stream()
-        .filter(t -> t instanceof Class)
-        .map(t -> (Class<?>) t)
-        .filter(c -> !(isVoid(c) || isString(c) || isPrimitiveOrWrapper(c) || isCollection(c) || c.isArray()))
-        .map(c -> {
-          var ts = map(c);
-          if (!ts.enumValues.isEmpty()) {
-            ts.type = "const enum";
-          } else {
-            ts.type = "interface";
-          }
-          return ts;
-        })
-        .collect(Collectors.toList());
+    var out = new ArrayList<RvTsType>();
+    for (var t : types) {
+      if (t instanceof Class) {
+        var ts = map(t);
+        if (((Class<?>) t).getTypeParameters().length > 0) {
+          ts.name = ts.type;
+        }
+        if (!ts.enumValues.isEmpty()) {
+          ts.type = "const enum";
+        } else {
+          ts.type = "interface";
+        }
+        if (ts.name != null && !ts.name.isEmpty()) {
+          out.add(ts);
+        }
+      }
+    }
+    return out;
   }
 
 }

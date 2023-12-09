@@ -1,8 +1,7 @@
 package io.vacco.ronove.plugin;
 
 import io.marioslab.basis.template.*;
-import io.vacco.ronove.RvContext;
-import io.vacco.ronove.RvDescriptor;
+import io.vacco.ronove.*;
 import org.gradle.api.logging.*;
 
 import java.lang.reflect.Type;
@@ -27,12 +26,13 @@ public class RvTsGen {
             .flatMap(RvDescriptor::allTypes)
             .collect(Collectors.toSet())
     );
+    var tsTypes = tsCtx.schemaTypes();
 
     context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
     context.set("rvDescriptors", idx.values());
-    context.set("tsSchemaTypes", tsCtx.schemaTypes());
-    context.set("decl", (Function<Type, String>) RvTsDeclarations::mapTail);
-    context.set("declList", (Function<RvDescriptor, String>) RvTsDeclarations::mapParams);
+    context.set("tsSchemaTypes", tsTypes);
+    context.set("retFn", (Function<Type, String>) RvTsDeclarations::mapReturn);
+    context.set("paramFn", (Function<RvDescriptor, String>) RvTsDeclarations::mapParams);
 
     return template.render(context);
   }

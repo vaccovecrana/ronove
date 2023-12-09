@@ -1,7 +1,6 @@
 package io.vacco.ronove.plugin;
 
-import io.vacco.ronove.RvAnnotations;
-import io.vacco.ronove.RvDescriptor;
+import io.vacco.ronove.*;
 import java.lang.reflect.*;
 
 import static io.vacco.ronove.RvPrimitives.*;
@@ -29,10 +28,13 @@ public class RvTsDeclarations {
   }
 
   private static String mapGeneric(ParameterizedType pt) {
+    if (pt.getRawType() == RvResponse.class) {
+      return mapTail(pt.getActualTypeArguments()[0]);
+    }
     return mapGeneric(pt.getRawType(), genericTypesOf(pt));
   }
 
-  public static String mapTail(Type t) {
+  private static String mapTail(Type t) {
     if (t instanceof Class) {
       var c = (Class<?>) t;
       if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c)) {
@@ -54,6 +56,10 @@ public class RvTsDeclarations {
     throw new IllegalStateException(
         format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
     );
+  }
+
+  public static String mapReturn(Type t) {
+    return mapTail(t);
   }
 
   public static String mapParams(RvDescriptor d) {

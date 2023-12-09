@@ -2,9 +2,11 @@ configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(true, f
 
 val api by configurations
 val undertowVer = "2.3.8.Final"
-version = undertowVer
+val mxp = project(":rv-core")
+
+version = "${mxp.version}_${undertowVer}"
 
 dependencies {
-  api(project(":rv-core"))
+  api(mxp)
   api("io.undertow:undertow-core:${undertowVer}")
 }
