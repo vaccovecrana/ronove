@@ -28,6 +28,7 @@ public class RvTsGen {
     );
     var tsTypes = tsCtx.schemaTypes();
 
+    tsTypes.sort(Comparator.comparing(ts0 -> ts0.name));
     context.set("rvControllers", controllers.stream().map(Class::getCanonicalName).collect(Collectors.toList()));
     context.set("rvDescriptors", idx.values());
     context.set("tsSchemaTypes", tsTypes);
