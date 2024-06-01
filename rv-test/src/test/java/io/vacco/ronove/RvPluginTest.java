@@ -55,6 +55,10 @@ public class RvPluginTest {
         c -> c.expected(IllegalStateException.class),
         () -> new RvContext().describe(BadApis.BadApi05.class)
       );
+      it("Rejects empty path mappings",
+        c -> c.expected(IllegalStateException.class),
+        () -> new RvContext().describe(BadApis.BadApi06.class)
+      );
       it("Ends validations", () -> {
         var api00 = new BadApis.BadApi00();
         var api01 = new BadApis.BadApi01();
@@ -62,6 +66,7 @@ public class RvPluginTest {
         var api03 = new BadApis.BadApi03();
         var api04 = new BadApis.BadApi04();
         var api05 = new BadApis.BadApi05();
+        var api06 = new BadApis.BadApi06();
 
         api00.bad00(-1);
         api01.bad01(null, null);
@@ -70,6 +75,7 @@ public class RvPluginTest {
         api04.bad04(null, null);
         api05.bad0501();
         api05.bad0502();
+        System.out.println(api06.toString());
       });
     });
 

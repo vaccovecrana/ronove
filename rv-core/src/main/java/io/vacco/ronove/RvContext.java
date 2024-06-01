@@ -138,6 +138,11 @@ public class RvContext {
         }
       }
     }
+    if (paths.isEmpty()) {
+      throw new IllegalStateException(format(
+        "No handler methods found for controller classes: %s", controllers
+      ));
+    }
     return paths;
   }
 

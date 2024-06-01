@@ -56,4 +56,6 @@ public class BadApis {
       return getClass().getSimpleName();
     }
   }
+
+  public static class BadApi06 {}
 }

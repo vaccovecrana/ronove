@@ -3,6 +3,6 @@ configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(true, f
 dependencies {
   implementation(gradleApi())
   implementation(project(":rv-core"))
-  implementation("io.github.classgraph:classgraph:4.8.162")
+  implementation("io.github.classgraph:classgraph:4.8.171")
   implementation("io.marioslab.basis:template:1.7")
 }
