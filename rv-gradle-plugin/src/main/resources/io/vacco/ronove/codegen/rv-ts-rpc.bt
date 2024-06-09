@@ -42,26 +42,28 @@ Source controllers:
 export const {{rvd.javaMethod.getName()}} = ({{paramFn.apply(rvd)}}): Promise<{{retFn.apply(rvd.responseType)}}> => {
   let path = "{{rvd.path.value()}}"
   {{for pp in rvd.pathParams}}
-    path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}
+  path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}
   {{end}}
   {{if !rvd.queryParams.isEmpty()}}
-    const qParams = new URLSearchParams()
-    {{for qp in rvd.queryParams}}
-      qParams.append("{{qp.name}}", {{qp.name}}.toString()){{"\n  "}}
-    {{end}}
-    path = `${path}?${qParams.toString()}`
+  const qParams = new URLSearchParams()
+  {{for qp in rvd.queryParams}}
+  if ({{qp.name}}) {
+    qParams.append("{{qp.name}}", {{qp.name}}.toString())
+  }
+  {{end}}
+  path = `${path}?${qParams.toString()}`
   {{end}}
   {{if !rvd.headerParams.isEmpty()}}
-    const headers = new Map<string, string>()
-    {{for hp in rvd.headerParams}}
-      headers.set("{{hp.name}}", {{hp.name}}){{"\n  "}}
-    {{end}}
+  const headers = new Map<string, string>()
+  {{for hp in rvd.headerParams}}
+  headers.set("{{hp.name}}", {{hp.name}}){{"\n  "}}
+  {{end}}
   {{end}}
   {{if !rvd.formParams.isEmpty()}}
-    const formData = new FormData();
-    {{for fp in rvd.formParams}}
-      formData.append("{{fp.name}}", {{fp.name}});
-    {{end}}
+  const formData = new FormData();
+  {{for fp in rvd.formParams}}
+  formData.append("{{fp.name}}", {{fp.name}});
+  {{end}}
   {{end}}
   return doJsonIo(path, "{{rvd.httpMethodTxt}}",
     {{if rvd.beanParam != null}}

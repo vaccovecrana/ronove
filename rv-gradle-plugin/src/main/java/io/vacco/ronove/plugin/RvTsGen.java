@@ -35,7 +35,13 @@ public class RvTsGen {
     context.set("retFn", (Function<Type, String>) RvTsDeclarations::mapReturn);
     context.set("paramFn", (Function<RvDescriptor, String>) RvTsDeclarations::mapParams);
 
-    return template.render(context);
+    var out = template.render(context);
+    out = Arrays.stream(out.split("\n"))
+      .filter(line -> !"  ".equals(line))
+      .filter(line -> !"    ".equals(line))
+      .collect(Collectors.joining("\n"));
+
+    return out;
   }
 
 }
