@@ -7,3 +7,5 @@ include(
 )
 
 project(":rv-gradle-plugin").name = "io.vacco.ronove.gradle.plugin"
+
+rootProject.name = "ronove"
