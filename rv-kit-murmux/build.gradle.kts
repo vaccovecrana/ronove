@@ -1,7 +1,7 @@
 configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(true, false) }
 
 val api by configurations
-val murmuxVer = "2.3.0"
+val murmuxVer = "[2,)"
 val mxp = project(":rv-core")
 
 version = "${mxp.version}_${murmuxVer}"
