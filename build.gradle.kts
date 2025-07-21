@@ -1,9 +1,9 @@
-plugins { id("io.vacco.oss.gitflow") version "1.0.1" }
+plugins { id("io.vacco.oss.gitflow") version "1.8.2" }
 
 subprojects {
   apply(plugin = "io.vacco.oss.gitflow")
   group = "io.vacco.ronove"
-  version = "1.3.0"
+  version = "1.4.0"
 
   configure<io.vacco.oss.gitflow.GsPluginProfileExtension> {
     addJ8Spec()

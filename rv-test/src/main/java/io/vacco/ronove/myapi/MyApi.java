@@ -1,6 +1,7 @@
 package io.vacco.ronove.myapi;
 
 import io.vacco.ronove.*;
+import io.vacco.ronove.plugin.OtAssignmentList;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import java.util.*;
@@ -24,6 +25,8 @@ public class MyApi {
 
   public static final String v1Pair = "/v1/pair";
   public static final String v1PairList = "/v1/pair/list";
+
+  public static final String v1AssignmentList = "/v1/assignment/list";
 
   @GET @Path(v1ApiPing)
   @Produces(MediaType.TEXT_PLAIN)
@@ -126,6 +129,11 @@ public class MyApi {
     p1.key = 2;
     p1.val = "Golf";
     return List.of(p0, p1);
+  }
+
+  @GET @Path(v1AssignmentList)
+  public OtAssignmentList v1AssignmentList() {
+    return new OtAssignmentList();
   }
 
 }

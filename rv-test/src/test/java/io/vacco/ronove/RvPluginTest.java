@@ -75,7 +75,7 @@ public class RvPluginTest {
         api04.bad04(null, null);
         api05.bad0501();
         api05.bad0502();
-        System.out.println(api06.toString());
+        System.out.println(api06);
       });
     });
 

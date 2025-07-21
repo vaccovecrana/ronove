@@ -54,7 +54,7 @@ public class RvTsDeclarations {
       return ((TypeVariable<?>) t).getName();
     }
     throw new IllegalStateException(
-        format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
+      format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
     );
   }
 
@@ -64,11 +64,11 @@ public class RvTsDeclarations {
 
   public static String mapParams(RvDescriptor d) {
     return d.allParams.stream()
-        .filter(prm -> !RvAnnotations.isRvAttachmentParam(prm.paramType))
-        .map(prm -> format(
-            "%s: %s", prm.name.replaceAll("[^a-zA-Z0-9]", ""),
-            mapTail(prm.type)
-        )).collect(joining(", "));
+      .filter(prm -> !RvAnnotations.isRvAttachmentParam(prm.paramType))
+      .map(prm -> format(
+        "%s: %s", prm.name.replaceAll("[^a-zA-Z0-9]", ""),
+        mapTail(prm.type)
+      )).collect(joining(", "));
   }
 
 }

@@ -5,7 +5,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.vacco.ronove.plugin.RvTsDeclarations.*;
 import static io.vacco.ronove.RvPrimitives.*;
@@ -15,8 +14,19 @@ public class RvTsContext {
 
   public final Set<Type> types = new LinkedHashSet<>();
 
+  private Optional<Type> superClass(Class<?> c) {
+    if (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
+      if (c.getSuperclass() != c.getGenericSuperclass()) {
+        return Optional.of(c.getGenericSuperclass());
+      } else {
+        return Optional.of(c.getSuperclass());
+      }
+    }
+    return Optional.empty();
+  }
+
   private void add(Type t) {
-    if (t == RvResponse.class) {
+    if (t == RvResponse.class || t == Object.class) {
       return;
     }
     if (!types.contains(t)) {
@@ -32,6 +42,7 @@ public class RvTsContext {
               add(f.getType());
             }
           }
+          superClass(c).ifPresent(this::add);
         }
       } else if (t instanceof ParameterizedType) {
         var pt = (ParameterizedType) t;
@@ -54,27 +65,30 @@ public class RvTsContext {
 
   private RvTsType map(Type t) {
     if (t instanceof TypeVariable) {
-      return new RvTsType(null, mapReturn(t));
+      return new RvTsType(null, mapReturn(t), t);
     } else if (t instanceof Class) {
       var c = (Class<?>) t;
       if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c) || isCollection(c) || c.isArray()) {
-        return new RvTsType(null, mapReturn(c));
+        return new RvTsType(null, mapReturn(c), t);
       } else if (c.isEnum()) {
-        var tse = new RvTsType(c.getSimpleName(), mapReturn(c));
+        var tse = new RvTsType(c.getSimpleName(), mapReturn(c), t);
         for (var ec : c.getEnumConstants()) {
           tse.enumValues.add(ec.toString());
         }
         return tse;
       } else {
-        var ts = new RvTsType(c.getSimpleName(), mapReturn(c));
+        var ts = new RvTsType(c.getSimpleName(), mapReturn(c), t);
         for (var f : c.getFields()) {
-          var fts = map(f.getGenericType()).withName(f.getName());
-          ts.properties.add(fts);
+          if (f.getDeclaringClass() == c) {
+            var fts = map(f.getGenericType()).withName(f.getName());
+            ts.properties.add(fts);
+          }
         }
+        superClass(c).ifPresent(st -> ts.extendz = map(st));
         return ts;
       }
     } else if (t instanceof ParameterizedType) {
-      return new RvTsType(null, mapReturn(t));
+      return new RvTsType(null, mapReturn(t), t);
     }
     throw new IllegalStateException(
         format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)

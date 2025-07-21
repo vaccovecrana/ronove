@@ -23,7 +23,7 @@ const doJsonIo = <I, O>(url: string, method: string, body: I,
 /* ============= RPC types ============== */
 /* ====================================== */
 {{for tsType in tsSchemaTypes}}
-export {{tsType.type}} {{tsType.name}} {
+export {{tsType.type}} {{tsType.name}}{{if tsType.extendz != null}} extends {{if tsType.extendz.name == null}}{{ tsType.extendz.type }}{{else}}{{ tsType.extendz.name }}{{end}}{{end}} {
   {{for prop in tsType.properties}}{{prop.name}}: {{prop.type}}{{";\n  "}}{{end}}
   {{for enumVal in tsType.enumValues}}{{enumVal}} = "{{enumVal}}",{{"\n  "}}{{end}}
 }
