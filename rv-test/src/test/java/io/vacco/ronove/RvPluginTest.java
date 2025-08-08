@@ -83,7 +83,7 @@ public class RvPluginTest {
         () -> it(
           "Can render Typescript bindings from annotated classes",
           () -> System.out.println(
-            new RvTsGen().render(Collections.singletonList(MyApi.class))
+            new RvTsGen().render(Collections.singletonList(MyApi.class), true)
           )
         )
     );

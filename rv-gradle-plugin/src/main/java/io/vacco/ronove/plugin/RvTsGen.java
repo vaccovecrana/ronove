@@ -13,7 +13,7 @@ public class RvTsGen {
 
   private static final Logger log = Logging.getLogger(RvContext.class);
 
-  public String render(List<Class<?>> controllers) {
+  public String render(List<Class<?>> controllers, boolean optionalFields) {
     log.warn("Generating RPC client from definitions: {}", controllers);
     var context = new TemplateContext();
     var loader = new TemplateLoader.ClasspathTemplateLoader();
@@ -34,6 +34,7 @@ public class RvTsGen {
     context.set("tsSchemaTypes", tsTypes);
     context.set("retFn", (Function<Type, String>) RvTsDeclarations::mapReturn);
     context.set("paramFn", (Function<RvDescriptor, String>) RvTsDeclarations::mapParams);
+    context.set("optionalFields", optionalFields);
 
     var out = template.render(context);
     out = Arrays.stream(out.split("\n"))
