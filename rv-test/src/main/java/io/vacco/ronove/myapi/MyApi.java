@@ -26,6 +26,8 @@ public class MyApi {
   public static final String v1Pair = "/v1/pair";
   public static final String v1PairList = "/v1/pair/list";
 
+  public static final String v1Yaml = "/v1/yaml";
+
   public static final String v1AssignmentList = "/v1/assignment/list";
 
   @GET @Path(v1ApiPing)
@@ -118,6 +120,13 @@ public class MyApi {
     p.key = requireNonNull(pairId);
     p.val = "Juno";
     return p;
+  }
+
+  @GET @Path(v1Yaml) @Produces("application/yaml")
+  public RvResponse<String> v1YamlGet() {
+    return new RvResponse<String>()
+      .withStatus(Response.Status.OK)
+      .withBody("---\nkey: value\n  nested: lol");
   }
 
   @GET @Path(v1PairList)

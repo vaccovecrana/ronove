@@ -69,6 +69,7 @@ public class RvRequestRunner {
     checkResOk(client.send(GET(format("%s?pairId=12000", v1Pair)), ofString()));
     checkResOk(client.send(GET(v1PairList), ofString()));
     checkResOk(client.send(GET(v1ApiPing), ofString()));
+    checkResOk(client.send(GET(v1Yaml), ofString()));
     checkResOk(
       client.send(
         GET(v1EchoCookie)

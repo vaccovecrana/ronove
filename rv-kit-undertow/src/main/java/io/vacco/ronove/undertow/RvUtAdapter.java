@@ -84,8 +84,8 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     return routingHandler;
   }
 
-  @Override public void commitResponse(RvDescriptor rvd, Object res,
-                                       HttpServerExchange x) throws Exception {
+  @Override public void commitResponse(RvDescriptor rvd,
+                                       Object res, HttpServerExchange x) throws Exception {
     if (rvd.httpStatus != null) {
       x.setStatusCode(rvd.httpStatus.value().getStatusCode());
     }
@@ -118,7 +118,15 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
         is.transferTo(Channels.newOutputStream(x.getResponseChannel()));
       }
     } else if (res.body != null) {
-      x.getResponseSender().send(jOut.toJson(res.body));
+      if (res.mediaType.equals("application/json")) {
+        x.getResponseSender().send(jOut.toJson(res.body));
+      } else if (res.body instanceof String) {
+        x.getResponseHeaders().add(HContentType, res.mediaType);
+        x.getResponseSender().send((String) res.body);
+      } else {
+        throw new UnsupportedOperationException(
+          "TODO - file a bug for custom body serialization at https://github.com/vaccovecrana/ronove/issues"
+        );      }
     }
     x.endExchange();
   }

@@ -3,6 +3,8 @@ package io.vacco.ronove.murmux;
 import io.vacco.murmux.http.*;
 import io.vacco.murmux.middleware.MxRouter;
 import io.vacco.ronove.*;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -85,7 +87,17 @@ public class RvMxAdapter<Api> extends RvAdapter<Api, MxHandler, MxExchange> {
         x.withHeader(HContentType, res.mediaType);
       }
     } else if (res.body != null) {
-      x.withBody(MxMime.json, jOut.toJson(res.body));
+      if (res.mediaType.equals(MxMime.json.type)) {
+        x.withBody(MxMime.json, jOut.toJson(res.body));
+      } else if (res.body instanceof String) { // TODO move this code to Murmux upstream
+        var bytes = ((String) res.body).getBytes(StandardCharsets.UTF_8);
+        var bis = new ByteArrayInputStream(bytes);
+        x.withBody(res.mediaType, bis, bytes.length);
+      } else {
+        throw new UnsupportedOperationException(
+          "TODO - file a bug for custom body serialization at https://github.com/vaccovecrana/ronove/issues"
+        );
+      }
     }
     x.commit();
   }
