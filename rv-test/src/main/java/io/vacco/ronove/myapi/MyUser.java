@@ -14,7 +14,9 @@ public class MyUser {
     return this;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return String.format("[nick: %s, avatar: %s]", nickName, avatarUrl);
   }
+
 }

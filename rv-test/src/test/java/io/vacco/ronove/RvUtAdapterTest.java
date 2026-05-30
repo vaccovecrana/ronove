@@ -1,23 +1,28 @@
 package io.vacco.ronove;
 
 import com.google.gson.Gson;
-import io.undertow.*;
-import io.undertow.server.*;
-import io.undertow.server.handlers.*;
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.ExceptionHandler;
 import io.undertow.server.handlers.form.FormEncodedDataDefinition;
-import io.undertow.util.*;
-import io.vacco.ronove.myapi.*;
-import io.vacco.ronove.undertow.*;
+import io.undertow.util.AttachmentKey;
+import io.vacco.ronove.myapi.MyApi;
+import io.vacco.ronove.myapi.MyUser;
+import io.vacco.ronove.undertow.RvUtAdapter;
+import io.vacco.ronove.undertow.RvUtAttachmentKey;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.BiConsumer;
 
 import static io.undertow.Handlers.exceptionHandler;
-import static io.vacco.ronove.undertow.RvUtHandlers.*;
-import static j8spec.J8Spec.*;
+import static io.vacco.ronove.undertow.RvUtHandlers.logged;
+import static j8spec.J8Spec.beforeAll;
+import static j8spec.J8Spec.it;
 
 @DefinedOrder
 @RunWith(J8SpecRunner.class)

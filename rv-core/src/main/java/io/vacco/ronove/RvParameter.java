@@ -11,19 +11,20 @@ import java.lang.reflect.Type;
  */
 public class RvParameter {
 
-  public int    position;
+  public int position;
   public String name;
-  public Type   type;
+  public Type type;
 
-  public Annotation   paramType;
+  public Annotation paramType;
   public DefaultValue defaultValue;
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return String.format(
-        "[%s] (%s) %s",
-        position,
-        paramType != null ? paramType.annotationType().getSimpleName() : "?",
-        name
+      "[%s] (%s) %s",
+      position,
+      paramType != null ? paramType.annotationType().getSimpleName() : "?",
+      name
     );
   }
 

@@ -7,9 +7,11 @@ import io.vacco.ronove.myapi.MyApi;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static j8spec.J8Spec.*;
+import static j8spec.J8Spec.beforeAll;
+import static j8spec.J8Spec.it;
 
 @DefinedOrder
 @RunWith(J8SpecRunner.class)

@@ -28,7 +28,8 @@ public class RvTsType {
     return this;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return format(
       "%s: %s%s",
       name, type,
@@ -36,13 +37,15 @@ public class RvTsType {
     );
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     return
       obj instanceof RvTsType
-      && ((RvTsType) obj).from.equals(this.from);
+        && ((RvTsType) obj).from.equals(this.from);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return this.from.hashCode();
   }
 

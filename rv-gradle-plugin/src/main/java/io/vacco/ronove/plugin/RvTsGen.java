@@ -1,11 +1,16 @@
 package io.vacco.ronove.plugin;
 
-import io.marioslab.basis.template.*;
-import io.vacco.ronove.*;
-import org.gradle.api.logging.*;
+import io.marioslab.basis.template.TemplateContext;
+import io.marioslab.basis.template.TemplateLoader;
+import io.vacco.ronove.RvContext;
+import io.vacco.ronove.RvDescriptor;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,10 +26,18 @@ public class RvTsGen {
     var ctx = new RvContext();
     var idx = ctx.describe(controllers);
 
+    for (var rvd : idx.values()) {
+      if (void.class.equals(rvd.responseType) || Void.class.equals(rvd.responseType)) {
+        log.warn("RPC method [{}] returns void. This generates Promise<void> which may cause " +
+          "runtime issues in TypeScript clients. Consider returning RvResponse<Void> instead.",
+          rvd.javaMethod.getName());
+      }
+    }
+
     var tsCtx = new RvTsContext().add(
-        idx.values().stream()
-            .flatMap(RvDescriptor::allTypes)
-            .collect(Collectors.toSet())
+      idx.values().stream()
+        .flatMap(RvDescriptor::allTypes)
+        .collect(Collectors.toSet())
     );
     var tsTypes = tsCtx.schemaTypes();
 

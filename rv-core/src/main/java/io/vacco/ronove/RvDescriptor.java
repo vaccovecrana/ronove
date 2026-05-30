@@ -1,10 +1,14 @@
 package io.vacco.ronove;
 
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -15,32 +19,33 @@ import java.util.stream.Stream;
  */
 public class RvDescriptor {
 
-  public Method     javaMethod;
+  public Method javaMethod;
   public Annotation httpMethod;
-  public Consumes   consumes;
-  public Produces   produces;
-  public String     httpMethodTxt;
-  public RvStatus   httpStatus;
-  public Path       path;
-  public Type       responseType;
+  public Consumes consumes;
+  public Produces produces;
+  public String httpMethodTxt;
+  public RvStatus httpStatus;
+  public Path path;
+  public Type responseType;
 
-  public RvParameter        beanParam;
-  public List<RvParameter>  pathParams        = new ArrayList<>();
-  public List<RvParameter>  queryParams       = new ArrayList<>();
-  public List<RvParameter>  cookieParams      = new ArrayList<>();
-  public List<RvParameter>  formParams        = new ArrayList<>();
-  public List<RvParameter>  headerParams      = new ArrayList<>();
-  public List<RvParameter>  attachmentParams  = new ArrayList<>();
-  public List<RvParameter>  allParams         = new ArrayList<>();
+  public RvParameter beanParam;
+  public List<RvParameter> pathParams = new ArrayList<>();
+  public List<RvParameter> queryParams = new ArrayList<>();
+  public List<RvParameter> cookieParams = new ArrayList<>();
+  public List<RvParameter> formParams = new ArrayList<>();
+  public List<RvParameter> headerParams = new ArrayList<>();
+  public List<RvParameter> attachmentParams = new ArrayList<>();
+  public List<RvParameter> allParams = new ArrayList<>();
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return String.format("(%s) %s", httpMethodTxt, path);
   }
 
   public Stream<Type> allTypes() {
     return Stream.concat(
-        Stream.of(responseType),
-        allParams.stream().map(rp -> rp.type)
+      Stream.of(responseType),
+      allParams.stream().map(rp -> rp.type)
     );
   }
 

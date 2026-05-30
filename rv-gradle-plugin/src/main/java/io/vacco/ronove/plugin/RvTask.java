@@ -1,15 +1,22 @@
 package io.vacco.ronove.plugin;
 
 import io.github.classgraph.ClassGraph;
-import org.gradle.api.*;
-import org.gradle.api.logging.*;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.Task;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class RvTask extends DefaultTask {
 
@@ -28,8 +35,8 @@ public class RvTask extends DefaultTask {
     var gradleCl = this.getClass().getClassLoader();
     try (var ucl = new URLClassLoader(urls.toArray(new URL[0]), gradleCl)) {
       var cg = new ClassGraph().verbose().enableAllInfo()
-          .acceptClasses(ext.controllerClasses)
-          .overrideClassLoaders(ucl);
+        .acceptClasses(ext.controllerClasses)
+        .overrideClassLoaders(ucl);
       String tsSrc;
       try (var scanResult = cg.scan()) {
         tsSrc = new RvTsGen().render(scanResult.getAllClasses().loadClasses(), ext.optionalFields);
@@ -38,7 +45,8 @@ public class RvTask extends DefaultTask {
     }
   }
 
-  @TaskAction public void action() {
+  @TaskAction
+  public void action() {
     var urls = new LinkedHashSet<URL>();
     try {
       for (Task task : getProject().getTasks()) {

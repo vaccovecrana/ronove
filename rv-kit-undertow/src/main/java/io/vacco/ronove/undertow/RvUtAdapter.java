@@ -1,29 +1,37 @@
 package io.vacco.ronove.undertow;
 
-import io.undertow.server.*;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.form.FormDataParser;
-import io.undertow.util.*;
+import io.undertow.util.AttachmentKey;
+import io.undertow.util.HttpString;
 import io.vacco.ronove.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExchange> {
 
-  private static final HttpString HContentType    = HttpString.tryFromString("Content-Type");
-  private static final HttpString HContentLength  = HttpString.tryFromString("Content-Length");
-  private static final HttpString HLocation       = HttpString.tryFromString("Location");
+  private static final HttpString HContentType = HttpString.tryFromString("Content-Type");
+  private static final HttpString HContentLength = HttpString.tryFromString("Content-Length");
+  private static final HttpString HLocation = HttpString.tryFromString("Location");
 
   private final Map<Class<?>, AttachmentKey<?>> attachmentKeyIdx = new HashMap<>();
   private final RoutingHandler routingHandler = new RoutingHandler();
-  private final RvJsonInput  jIn;
+  private final RvJsonInput jIn;
   private final RvJsonOutput jOut;
 
   public RvUtAdapter(Api api, BiConsumer<HttpServerExchange, Exception> errorHandler,
-                     RvJsonInput jIn, RvJsonOutput jOut, RvUtAttachmentKey<?> ... attachmentKeys) {
+                     RvJsonInput jIn, RvJsonOutput jOut, RvUtAttachmentKey<?>... attachmentKeys) {
     super(api, errorHandler);
     this.jIn = Objects.requireNonNull(jIn);
     this.jOut = Objects.requireNonNull(jOut);
@@ -32,22 +40,26 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     }
   }
 
-  @Override public String loadPath(RvParameter pp, HttpServerExchange x) {
+  @Override
+  public String loadPath(RvParameter pp, HttpServerExchange x) {
     var pv = x.getQueryParameters().get(pp.name);
     return pv != null ? pv.getFirst() : null;
   }
 
-  @Override public String loadQuery(RvParameter qp, HttpServerExchange x) {
+  @Override
+  public String loadQuery(RvParameter qp, HttpServerExchange x) {
     var qv = x.getQueryParameters().get(qp.name);
     return qv != null ? qv.getFirst() : null;
   }
 
-  @Override public String loadCookie(RvParameter cp, HttpServerExchange x) {
+  @Override
+  public String loadCookie(RvParameter cp, HttpServerExchange x) {
     var qv = x.getRequestCookie(cp.name);
     return qv != null ? qv.getValue() : null;
   }
 
-  @Override public String loadForm(RvParameter fp, HttpServerExchange x) {
+  @Override
+  public String loadForm(RvParameter fp, HttpServerExchange x) {
     var formData = x.getAttachment(FormDataParser.FORM_DATA);
     if (formData != null) {
       return formData.get(fp.name).getFirst().getValue();
@@ -55,13 +67,15 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     return null;
   }
 
-  @Override public String loadHeader(RvParameter hp, HttpServerExchange x) {
+  @Override
+  public String loadHeader(RvParameter hp, HttpServerExchange x) {
     var hv = x.getRequestHeaders().get(hp.name);
     return hv != null ? hv.getFirst() : null;
   }
 
-  @Override public Object loadAttachment(RvParameter ap, RvAttachmentParam at,
-                                         HttpServerExchange x) {
+  @Override
+  public Object loadAttachment(RvParameter ap, RvAttachmentParam at,
+                               HttpServerExchange x) {
     var ak = attachmentKeyIdx.get(at.value());
     if (ak != null) {
       return x.getAttachment(ak);
@@ -69,12 +83,14 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     return null;
   }
 
-  @Override public Object loadBean(RvParameter bp, HttpServerExchange x) {
+  @Override
+  public Object loadBean(RvParameter bp, HttpServerExchange x) {
     var rd = Channels.newReader(x.getRequestChannel(), StandardCharsets.UTF_8);
     return jIn.fromJson(rd, bp.type);
   }
 
-  @Override public HttpHandler combine(List<RvHandler<HttpServerExchange>> rvHandlers) {
+  @Override
+  public HttpHandler combine(List<RvHandler<HttpServerExchange>> rvHandlers) {
     for (var rvh : rvHandlers) {
       routingHandler.add(
         rvh.descriptor.httpMethodTxt, rvh.descriptor.path.value(),
@@ -84,8 +100,9 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     return routingHandler;
   }
 
-  @Override public void commitResponse(RvDescriptor rvd,
-                                       Object res, HttpServerExchange x) throws Exception {
+  @Override
+  public void commitResponse(RvDescriptor rvd,
+                             Object res, HttpServerExchange x) throws Exception {
     if (rvd.httpStatus != null) {
       x.setStatusCode(rvd.httpStatus.value().getStatusCode());
     }
@@ -99,7 +116,11 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
     x.endExchange();
   }
 
-  @Override public void commitResponse(RvResponse<?> res, HttpServerExchange x) throws Exception {
+  @Override
+  public void commitResponse(RvResponse<?> res, HttpServerExchange x) throws Exception {
+    if (res.error != null && res.status == null) {
+      res.status = Response.Status.INTERNAL_SERVER_ERROR;
+    }
     x.setStatusCode(res.status.getStatusCode());
     if (res.redirectPath != null) {
       x.getResponseHeaders().add(HLocation, res.redirectPath);
@@ -126,7 +147,8 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
       } else {
         throw new UnsupportedOperationException(
           "TODO - file a bug for custom body serialization at https://github.com/vaccovecrana/ronove/issues"
-        );      }
+        );
+      }
     }
     x.endExchange();
   }

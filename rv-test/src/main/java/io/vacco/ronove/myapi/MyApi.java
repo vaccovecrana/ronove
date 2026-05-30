@@ -1,10 +1,16 @@
 package io.vacco.ronove.myapi;
 
-import io.vacco.ronove.*;
+import io.vacco.ronove.RvAttachmentParam;
+import io.vacco.ronove.RvResponse;
+import io.vacco.ronove.RvStatus;
 import io.vacco.ronove.plugin.OtAssignmentList;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
-import java.util.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -30,7 +36,8 @@ public class MyApi {
 
   public static final String v1AssignmentList = "/v1/assignment/list";
 
-  @GET @Path(v1ApiPing)
+  @GET
+  @Path(v1ApiPing)
   @Produces(MediaType.TEXT_PLAIN)
   public RvResponse<String> hello() {
     return new RvResponse<String>()
@@ -38,19 +45,22 @@ public class MyApi {
       .withStream(MyApi.class.getResource("/pong.txt"));
   }
 
-  @GET @Path(v1ApiEcho)
+  @GET
+  @Path(v1ApiEcho)
   public MyReply<Integer> getSomeEchoFn(@PathParam("someNumber") int someNumber,
                                         @RvAttachmentParam(MyUser.class) MyUser me) {
     System.out.printf("You are: [%s]%n", requireNonNull(me));
     return MyReply.ok(someNumber);
   }
 
-  @GET @Path(v1ApiOptions)
+  @GET
+  @Path(v1ApiOptions)
   public MyReply<List<MyOpts>> getApiOpts() {
     return MyReply.ok(Arrays.asList(MyOpts.values()));
   }
 
-  @GET @Path(v1BlogOptions)
+  @GET
+  @Path(v1BlogOptions)
   public RvResponse<MyReply<List<MyBlogEntry>>> getBlogsByOption(@QueryParam("anOption") MyOpts anOption,
                                                                  @QueryParam("sort") @DefaultValue("asc") String sort) {
     requireNonNull(anOption);
@@ -71,7 +81,8 @@ public class MyApi {
       .withBody(MyReply.ok(Arrays.asList(e0, e1)));
   }
 
-  @GET @Path(v1Blog)
+  @GET
+  @Path(v1Blog)
   public MyReply<MyBlogEntry> getBlogPost(@QueryParam("blogId") long blogId) {
     var e = new MyBlogEntry();
     e.bid = blogId;
@@ -80,7 +91,8 @@ public class MyApi {
     return MyReply.ok(e);
   }
 
-  @PATCH @Path(v1BlogTagsUpdate)
+  @PATCH
+  @Path(v1BlogTagsUpdate)
   @Consumes(MediaType.APPLICATION_JSON)
   @RvStatus(Response.Status.NO_CONTENT)
   public void patchBlogTags(@BeanParam List<MyBlogTagsUpdate> blogUpdates,
@@ -90,18 +102,20 @@ public class MyApi {
     System.out.printf("====> [upd: %s, token: %s]%n", blogUpdates, token);
   }
 
-  @GET @Path(v1EchoCookie)
+  @GET
+  @Path(v1EchoCookie)
   public String[] echoCookies(@CookieParam("name") String name,
                               @CookieParam("name2") String name2,
                               @CookieParam("name3") String name3) {
-    return new String[] {
+    return new String[]{
       requireNonNull(name),
       requireNonNull(name2),
       requireNonNull(name3)
     };
   }
 
-  @POST @Path(v1Login)
+  @POST
+  @Path(v1Login)
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   public RvResponse<Void> login(@FormParam("username") String username,
                                 @FormParam("password") String password) {
@@ -114,7 +128,8 @@ public class MyApi {
       .withHeader("superSecretToken", "mamamax1234");
   }
 
-  @GET @Path(v1Pair)
+  @GET
+  @Path(v1Pair)
   public MyPair<Integer, String> v1Pair(@QueryParam("pairId") Integer pairId) {
     var p = new MyPair<Integer, String>();
     p.key = requireNonNull(pairId);
@@ -122,14 +137,17 @@ public class MyApi {
     return p;
   }
 
-  @GET @Path(v1Yaml) @Produces("application/yaml")
+  @GET
+  @Path(v1Yaml)
+  @Produces("application/yaml")
   public RvResponse<String> v1YamlGet() {
     return new RvResponse<String>()
       .withStatus(Response.Status.OK)
       .withBody("---\nkey: value\n  nested: lol");
   }
 
-  @GET @Path(v1PairList)
+  @GET
+  @Path(v1PairList)
   public List<MyPair<Integer, String>> v1PairList() {
     var p0 = new MyPair<Integer, String>();
     var p1 = new MyPair<Integer, String>();
@@ -140,7 +158,8 @@ public class MyApi {
     return List.of(p0, p1);
   }
 
-  @GET @Path(v1AssignmentList)
+  @GET
+  @Path(v1AssignmentList)
   public OtAssignmentList v1AssignmentList() {
     return new OtAssignmentList();
   }

@@ -1,20 +1,26 @@
 package io.vacco.ronove;
 
-import com.github.mizosoft.methanol.*;
+import com.github.mizosoft.methanol.FormBodyPublisher;
+import com.github.mizosoft.methanol.Methanol;
+import com.github.mizosoft.methanol.MutableRequest;
 import com.google.gson.Gson;
 import io.vacco.ronove.myapi.MyBlogTagsUpdate;
 import jakarta.ws.rs.core.Response;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.http.*;
-import java.util.*;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Set;
 
-import static org.junit.Assert.*;
-import static com.github.mizosoft.methanol.MutableRequest.*;
+import static com.github.mizosoft.methanol.MutableRequest.GET;
+import static com.github.mizosoft.methanol.MutableRequest.POST;
 import static io.vacco.ronove.myapi.MyApi.*;
 import static java.lang.String.format;
 import static java.net.http.HttpResponse.BodyHandlers.ofString;
+import static org.junit.Assert.assertEquals;
 
 public class RvRequestRunner {
 

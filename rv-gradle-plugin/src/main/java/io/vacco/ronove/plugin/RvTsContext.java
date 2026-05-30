@@ -1,13 +1,16 @@
 package io.vacco.ronove.plugin;
 
 import io.vacco.ronove.RvResponse;
+
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 
-import static io.vacco.ronove.plugin.RvTsDeclarations.*;
 import static io.vacco.ronove.RvPrimitives.*;
+import static io.vacco.ronove.plugin.RvTsDeclarations.genericTypesOf;
+import static io.vacco.ronove.plugin.RvTsDeclarations.mapReturn;
 import static java.lang.String.format;
 
 public class RvTsContext {
@@ -34,8 +37,12 @@ public class RvTsContext {
         var c = (Class<?>) t;
         if (c.isArray()) {
           add(c.getComponentType());
-        } else if (!(isVoid(c) || isString(c) || isPrimitiveOrWrapper(c) || c.isEnum())) {
+        } else if (!(isVoid(c) || isString(c) || isPrimitiveOrWrapper(c) || c.isEnum()
+            || Map.class.isAssignableFrom(c))) {
           for (var f : c.getFields()) {
+            if (Modifier.isTransient(f.getModifiers())) {
+              continue;
+            }
             if (f.getType() != f.getGenericType()) {
               add(f.getGenericType());
             } else {
@@ -79,7 +86,7 @@ public class RvTsContext {
       } else {
         var ts = new RvTsType(c.getSimpleName(), mapReturn(c), t);
         for (var f : c.getFields()) {
-          if (f.getDeclaringClass() == c) {
+          if (f.getDeclaringClass() == c && !Modifier.isTransient(f.getModifiers())) {
             var fts = map(f.getGenericType()).withName(f.getName());
             ts.properties.add(fts);
           }
@@ -91,7 +98,7 @@ public class RvTsContext {
       return new RvTsType(null, mapReturn(t), t);
     }
     throw new IllegalStateException(
-        format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
+      format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
     );
   }
 

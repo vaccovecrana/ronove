@@ -8,14 +8,23 @@ public class RvPrimitives {
 
   public static Class<?> toWrapperClass(Class<?> type) {
     if (!type.isPrimitive()) return type;
-    else if (int.class.equals(type)) { return Integer.class; }
-    else if (double.class.equals(type)) { return Double.class; }
-    else if (char.class.equals(type)) { return Character.class; }
-    else if (boolean.class.equals(type)) { return Boolean.class; }
-    else if (long.class.equals(type)) { return Long.class; }
-    else if (float.class.equals(type)) { return Float.class; }
-    else if (short.class.equals(type)) { return Short.class; }
-    else if (byte.class.equals(type)) { return Byte.class; }
+    else if (int.class.equals(type)) {
+      return Integer.class;
+    } else if (double.class.equals(type)) {
+      return Double.class;
+    } else if (char.class.equals(type)) {
+      return Character.class;
+    } else if (boolean.class.equals(type)) {
+      return Boolean.class;
+    } else if (long.class.equals(type)) {
+      return Long.class;
+    } else if (float.class.equals(type)) {
+      return Float.class;
+    } else if (short.class.equals(type)) {
+      return Short.class;
+    } else if (byte.class.equals(type)) {
+      return Byte.class;
+    }
     return type;
   }
 
@@ -31,22 +40,30 @@ public class RvPrimitives {
   }
 
   public static boolean isPrimitiveOrWrapper(Class<?> clazz) {
-    if (clazz == null) { return false; }
+    if (clazz == null) {
+      return false;
+    }
     return clazz.isPrimitive() || isWrapperType(toWrapperClass(clazz));
   }
 
   public static boolean isCollection(Class<?> clazz) {
-    if (clazz == null) { return false; }
+    if (clazz == null) {
+      return false;
+    }
     return Collection.class.isAssignableFrom(clazz);
   }
 
   public static boolean isVoid(Class<?> clazz) {
-    if (clazz == null) { return false; }
+    if (clazz == null) {
+      return false;
+    }
     return void.class.isAssignableFrom(clazz) || Void.class.isAssignableFrom(clazz);
   }
 
   public static boolean isString(Class<?> clazz) {
-    if (clazz == null) { return false; }
+    if (clazz == null) {
+      return false;
+    }
     return String.class.isAssignableFrom(clazz);
   }
 

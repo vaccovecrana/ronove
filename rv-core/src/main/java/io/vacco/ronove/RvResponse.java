@@ -1,18 +1,20 @@
 package io.vacco.ronove;
 
 import com.sun.net.httpserver.Headers;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.Response;
+
 import java.net.URL;
 import java.util.Objects;
 
 public class RvResponse<T> {
 
-  public final Headers    headers = new Headers();
-  public String           mediaType;
-  public Response.Status  status;
-  public URL              bodyUrl;
-  public T                body;
-  public String           redirectPath;
+  public final Headers headers = new Headers();
+  public String mediaType;
+  public Response.Status status;
+  public URL bodyUrl;
+  public T body;
+  public Exception error;
+  public String redirectPath;
 
   public RvResponse<T> withMediaType(String mediaType) {
     this.mediaType = Objects.requireNonNull(mediaType);
@@ -41,6 +43,11 @@ public class RvResponse<T> {
 
   public RvResponse<T> withRedirectPath(String redirectPath) {
     this.redirectPath = Objects.requireNonNull(redirectPath);
+    return this;
+  }
+
+  public RvResponse<T> withError(Exception error) {
+    this.error = Objects.requireNonNull(error);
     return this;
   }
 

@@ -1,13 +1,18 @@
 package io.vacco.ronove.plugin;
 
-import io.vacco.ronove.*;
-import java.lang.reflect.*;
+import io.vacco.ronove.RvAnnotations;
+import io.vacco.ronove.RvDescriptor;
+import io.vacco.ronove.RvResponse;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 import static io.vacco.ronove.RvPrimitives.*;
-import static io.vacco.ronove.plugin.RvTsPrimitives.*;
+import static io.vacco.ronove.plugin.RvTsPrimitives.tsTypes;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
-import static java.lang.String.format;
 
 public class RvTsDeclarations {
 

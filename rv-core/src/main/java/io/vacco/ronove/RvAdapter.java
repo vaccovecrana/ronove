@@ -1,7 +1,8 @@
 package io.vacco.ronove;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -22,11 +23,17 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
   }
 
   public abstract String loadPath(RvParameter pp, Xc xc);
+
   public abstract String loadQuery(RvParameter qp, Xc xc);
+
   public abstract String loadCookie(RvParameter cp, Xc xc);
+
   public abstract String loadForm(RvParameter fp, Xc xc);
+
   public abstract String loadHeader(RvParameter hp, Xc xc);
+
   public abstract Object loadAttachment(RvParameter ap, RvAttachmentParam at, Xc xc);
+
   public abstract Object loadBean(RvParameter bp, Xc xc);
 
   public abstract Hdl combine(List<RvHandler<Xc>> handlers);
@@ -95,7 +102,7 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
           for (var hp : rvd.headerParams) {
             params[hp.position] = valueOrDefault(hp, loadHeader(hp, xc));
           }
-          for (var ap: rvd.attachmentParams) {
+          for (var ap : rvd.attachmentParams) {
             params[ap.position] = loadAttachment(ap, (RvAttachmentParam) ap.paramType, xc);
           }
           if (rvd.beanParam != null) {
