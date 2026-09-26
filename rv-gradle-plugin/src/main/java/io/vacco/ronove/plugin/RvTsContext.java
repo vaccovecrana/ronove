@@ -106,6 +106,9 @@ public class RvTsContext {
     var out = new ArrayList<RvTsType>();
     for (var t : types) {
       if (t instanceof Class) {
+        if (isMap((Class<?>) t)) {
+          continue;
+        }
         var ts = map(t);
         if (((Class<?>) t).getTypeParameters().length > 0) {
           ts.name = ts.type;

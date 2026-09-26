@@ -2,6 +2,7 @@ package io.vacco.ronove;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 public class RvPrimitives {
@@ -47,10 +48,11 @@ public class RvPrimitives {
   }
 
   public static boolean isCollection(Class<?> clazz) {
-    if (clazz == null) {
-      return false;
-    }
-    return Collection.class.isAssignableFrom(clazz);
+    return clazz != null && Collection.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isMap(Class<?> clazz) {
+    return clazz != null && Map.class.isAssignableFrom(clazz);
   }
 
   public static boolean isVoid(Class<?> clazz) {
