@@ -37,8 +37,7 @@ public class RvTsContext {
         var c = (Class<?>) t;
         if (c.isArray()) {
           add(c.getComponentType());
-        } else if (!(isVoid(c) || isString(c) || isPrimitiveOrWrapper(c) || c.isEnum()
-            || Map.class.isAssignableFrom(c))) {
+        } else if (!(isVoid(c) || isString(c) || isPrimitiveOrWrapper(c) || c.isEnum())) {
           for (var f : c.getFields()) {
             if (Modifier.isTransient(f.getModifiers())) {
               continue;
