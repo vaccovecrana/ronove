@@ -11,6 +11,8 @@ import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static java.util.Objects.requireNonNull;
 
@@ -29,6 +31,7 @@ public class MyApi {
   public static final String v1EchoCookie = "/v1/cookie-echo";
   public static final String v1Login = "/v1/login";
 
+  public static final String v1Map = "/v1/map";
   public static final String v1Pair = "/v1/pair";
   public static final String v1PairList = "/v1/pair/list";
 
@@ -156,6 +159,14 @@ public class MyApi {
     p1.key = 2;
     p1.val = "Golf";
     return List.of(p0, p1);
+  }
+
+  @GET
+  @Path(v1Map)
+  public MyReply<Map<String, String>> v1Map() {
+    var m0 = new TreeMap<String, String>();
+    m0.put("Fry", "Leela");
+    return MyReply.ok(m0);
   }
 
   @GET

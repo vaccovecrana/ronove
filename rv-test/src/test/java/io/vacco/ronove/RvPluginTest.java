@@ -109,9 +109,11 @@ public class RvPluginTest {
     describe(RvPlugin.class.getCanonicalName(),
       () -> it(
         "Can render Typescript bindings from annotated classes",
-        () -> System.out.println(
-          new RvTsGen().render(Collections.singletonList(MyApi.class), true)
-        )
+        () -> {
+          var rpc =  new RvTsGen().render(Collections.singletonList(MyApi.class), true);
+          System.out.println(rpc);
+          assertFalse(rpc.contains("interface Map"));
+        }
       )
     );
 
