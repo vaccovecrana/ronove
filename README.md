@@ -57,11 +57,31 @@ ronove {
   controllerClasses = arrayOf("com.example.MyApi")
   outFile.set(layout.projectDirectory.file("src/web/rpc.ts"))
   optionalFields = false
+  // optional: emit GraalVM reflection metadata for the same DTO type graph
+  reflectConfigFile.set(layout.projectDirectory.file(
+    "src/main/resources/META-INF/native-image/com.example/app/reflect-config.json"
+  ))
+  // optional: emit the newer GraalVM 23.1+ reachability metadata instead
+  reachabilityMetadataFile.set(layout.projectDirectory.file(
+    "src/main/resources/META-INF/native-image/com.example/app/reachability-metadata.json"
+  ))
 }
 ```
 
 The plugin adds `jakarta.ws.rs-api` and registers the `ronoveTypescriptRpc` task (runs after `classes`),
 which scans `controllerClasses` and writes the TS client to `outFile`.
+
+When `reflectConfigFile` and/or `reachabilityMetadataFile` is set, the same task also writes GraalVM
+reflection metadata covering every DTO reachable from the controllers, so JSON (de)serialization works in a
+`native-image` build without running the tracing agent.
+
+- `reflectConfigFile` emits the classic `reflect-config.json`, a supported input for GraalVM 22+ (and still
+  read by 23.x/24.x).
+- `reachabilityMetadataFile` emits the newer `reachability-metadata.json` (GraalVM 23.1+) with the reflection
+  entries under a top-level `reflection` array.
+
+Either file can be set independently, or both at once. Place them under
+`META-INF/native-image/<group>/<artifact>/` so native-image picks them up from the classpath automatically.
 
 ## Request parameters
 

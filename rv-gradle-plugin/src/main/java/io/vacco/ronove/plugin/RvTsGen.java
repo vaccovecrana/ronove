@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,12 +20,16 @@ public class RvTsGen {
   private static final Logger log = Logging.getLogger(RvContext.class);
 
   public String render(List<Class<?>> controllers, boolean optionalFields) {
+    var idx = new RvContext().describe(controllers);
+    return render(controllers, idx, RvTsContext.from(idx), optionalFields);
+  }
+
+  public String render(List<Class<?>> controllers, Map<String, RvDescriptor> idx,
+                       RvTsContext tsCtx, boolean optionalFields) {
     log.warn("Generating RPC client from definitions: {}", controllers);
     var context = new TemplateContext();
     var loader = new TemplateLoader.ClasspathTemplateLoader();
     var template = loader.load("/io/vacco/ronove/codegen/rv-ts-rpc.bt");
-    var ctx = new RvContext();
-    var idx = ctx.describe(controllers);
 
     for (var rvd : idx.values()) {
       if (void.class.equals(rvd.responseType) || Void.class.equals(rvd.responseType)) {
@@ -34,11 +39,6 @@ public class RvTsGen {
       }
     }
 
-    var tsCtx = new RvTsContext().add(
-      idx.values().stream()
-        .flatMap(RvDescriptor::allTypes)
-        .collect(Collectors.toSet())
-    );
     var tsTypes = tsCtx.schemaTypes();
 
     tsTypes.sort(Comparator.comparing(ts0 -> ts0.name));

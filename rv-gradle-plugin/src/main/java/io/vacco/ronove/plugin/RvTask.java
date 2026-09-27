@@ -1,6 +1,7 @@
 package io.vacco.ronove.plugin;
 
 import io.github.classgraph.ClassGraph;
+import io.vacco.ronove.RvContext;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
@@ -30,6 +31,14 @@ public class RvTask extends DefaultTask {
     return urls;
   }
 
+  private void write(File target, String content) throws IOException {
+    var path = target.toPath();
+    if (path.getParent() != null) {
+      Files.createDirectories(path.getParent());
+    }
+    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+  }
+
   private void doGenerate(Set<URL> urls) throws IOException {
     var ext = getProject().getExtensions().getByType(RvPluginExtension.class);
     var gradleCl = this.getClass().getClassLoader();
@@ -39,9 +48,26 @@ public class RvTask extends DefaultTask {
         .overrideClassLoaders(ucl);
       String tsSrc;
       try (var scanResult = cg.scan()) {
-        tsSrc = new RvTsGen().render(scanResult.getAllClasses().loadClasses(), ext.optionalFields);
+        var controllers = scanResult.getAllClasses().loadClasses();
+        var idx = new RvContext().describe(controllers);
+        var gen = new RvTsGen();
+        var tsCtx = RvTsContext.from(idx);
+        tsSrc = gen.render(controllers, idx, tsCtx, ext.optionalFields);
+        if (ext.reflectConfigFile.isPresent() || ext.reachabilityMetadataFile.isPresent()) {
+          var reflectTypes = tsCtx.reflectTypes();
+          var graalGen = new RvGraalGen();
+          if (ext.reflectConfigFile.isPresent()) {
+            write(ext.reflectConfigFile.get().getAsFile(), graalGen.reflectConfig(reflectTypes));
+          }
+          if (ext.reachabilityMetadataFile.isPresent()) {
+            write(
+              ext.reachabilityMetadataFile.get().getAsFile(),
+              graalGen.reachabilityMetadata(reflectTypes)
+            );
+          }
+        }
       }
-      Files.write(ext.outFile.get().getAsFile().toPath(), tsSrc.getBytes(StandardCharsets.UTF_8));
+      write(ext.outFile.get().getAsFile(), tsSrc);
     }
   }
 

@@ -3,6 +3,7 @@ package io.vacco.ronove;
 import io.vacco.ronove.badapi.BadApis;
 import io.vacco.ronove.myapi.MyApi;
 import io.vacco.ronove.myapi.MyFieldTestModel;
+import io.vacco.ronove.plugin.RvGraalGen;
 import io.vacco.ronove.plugin.RvPlugin;
 import io.vacco.ronove.plugin.RvTsGen;
 import io.vacco.ronove.plugin.RvTsContext;
@@ -12,7 +13,9 @@ import jakarta.ws.rs.core.Response;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static j8spec.J8Spec.describe;
 import static j8spec.J8Spec.it;
@@ -117,7 +120,7 @@ public class RvPluginTest {
       )
     );
 
-    describe(RvTsContext.class.getCanonicalName(), () ->
+    describe(RvTsContext.class.getCanonicalName(), () -> {
       it("Filters out transient fields from schema types",
         () -> {
           var tsCtx = new RvTsContext().add(Collections.singletonList((Type) MyFieldTestModel.class));
@@ -128,7 +131,56 @@ public class RvPluginTest {
           assertEquals(1, schemaType.properties.size());
           assertEquals("visible", schemaType.properties.get(0).name);
         }
-      )
-    );
+      );
+      it("Resolves reflect config types from controller definitions",
+        () -> {
+          var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
+          var reflect = RvTsContext.from(idx).reflectTypes().stream()
+            .map(Class::getSimpleName)
+            .collect(Collectors.toSet());
+          assertTrue(reflect.containsAll(Arrays.asList(
+            "MyReply", "MyPair", "MyBlogEntry", "MyBlogTagsUpdate", "MyUser", "MyOpts",
+            "OtAssignmentList", "OtList", "OtResult", "MtPage1", "OtApiKey", "OtKeyNamespace",
+            "RvResult", "RvValidation"
+          )));
+          assertFalse(reflect.contains("String"));
+          assertFalse(reflect.contains("List"));
+          assertFalse(reflect.contains("Map"));
+          assertFalse(reflect.contains("TreeMap"));
+        }
+      );
+      it("Renders Graal reflect-config JSON from resolved types",
+        () -> {
+          var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
+          var json = new RvGraalGen().reflectConfig(
+            RvTsContext.from(idx).reflectTypes()
+          );
+          assertTrue(json.startsWith("[\n"));
+          assertTrue(json.trim().endsWith("]"));
+          assertTrue(json.contains("\"name\": \"io.vacco.ronove.myapi.MyBlogEntry\""));
+          assertTrue(json.contains("\"allDeclaredConstructors\": true"));
+          assertTrue(json.contains("\"allDeclaredFields\": true"));
+          assertTrue(json.contains("\"allDeclaredMethods\": true"));
+          assertFalse(json.contains("\"name\": \"java."));
+          assertFalse(json.contains("\"name\": \"jakarta."));
+        }
+      );
+      it("Renders Graal reachability-metadata JSON from resolved types",
+        () -> {
+          var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
+          var json = new RvGraalGen().reachabilityMetadata(
+            RvTsContext.from(idx).reflectTypes()
+          );
+          assertTrue(json.startsWith("{\n  \"reflection\": [\n"));
+          assertTrue(json.trim().replaceAll("\\s+", "").endsWith("]}"));
+          assertTrue(json.contains("\"type\": \"io.vacco.ronove.myapi.MyBlogEntry\""));
+          assertTrue(json.contains("\"allDeclaredConstructors\": true"));
+          assertTrue(json.contains("\"allDeclaredFields\": true"));
+          assertTrue(json.contains("\"allDeclaredMethods\": true"));
+          assertFalse(json.contains("\"type\": \"java."));
+          assertFalse(json.contains("\"type\": \"jakarta."));
+        }
+      );
+    });
   }
 }

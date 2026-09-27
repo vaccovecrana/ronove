@@ -1,5 +1,6 @@
 package io.vacco.ronove.plugin;
 
+import io.vacco.ronove.RvDescriptor;
 import io.vacco.ronove.RvResponse;
 
 import java.lang.reflect.Modifier;
@@ -7,6 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.vacco.ronove.RvPrimitives.*;
 import static io.vacco.ronove.plugin.RvTsDeclarations.genericTypesOf;
@@ -16,6 +18,18 @@ import static java.lang.String.format;
 public class RvTsContext {
 
   public final Set<Type> types = new LinkedHashSet<>();
+
+  /**
+   * Assembles the resolved type graph reachable from the given controller
+   * descriptors. Shared by all code generators.
+   */
+  public static RvTsContext from(Map<String, RvDescriptor> idx) {
+    return new RvTsContext().add(
+      idx.values().stream()
+        .flatMap(RvDescriptor::allTypes)
+        .collect(Collectors.toSet())
+    );
+  }
 
   private Optional<Type> superClass(Class<?> c) {
     if (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
@@ -99,6 +113,51 @@ public class RvTsContext {
     throw new IllegalStateException(
       format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
     );
+  }
+
+  private static boolean isJdkType(Class<?> c) {
+    var pkg = c.getPackage();
+    var p = pkg != null ? pkg.getName() : "";
+    return p.startsWith("java.")
+      || p.startsWith("javax.")
+      || p.startsWith("jdk.")
+      || p.startsWith("sun.")
+      || p.startsWith("jakarta.");
+  }
+
+  /**
+   * Returns the resolved set of application types reachable from the controllers,
+   * suitable for GraalVM reflection registration. JDK/Jakarta types and types
+   * GraalVM handles out of the box (collections, maps, primitives, String) are
+   * excluded.
+   */
+  public List<Class<?>> reflectTypes() {
+    var out = new LinkedHashSet<Class<?>>();
+    for (var t : types) {
+      Class<?> c = null;
+      if (t instanceof Class) {
+        c = (Class<?>) t;
+      } else if (t instanceof ParameterizedType) {
+        var raw = ((ParameterizedType) t).getRawType();
+        if (raw instanceof Class) {
+          c = (Class<?>) raw;
+        }
+      }
+      if (c == null
+        || isPrimitiveOrWrapper(c)
+        || isVoid(c)
+        || isString(c)
+        || c.isArray()
+        || isCollection(c)
+        || isMap(c)
+        || isJdkType(c)) {
+        continue;
+      }
+      out.add(c);
+    }
+    var list = new ArrayList<>(out);
+    list.sort(Comparator.comparing(Class::getCanonicalName));
+    return list;
   }
 
   public List<RvTsType> schemaTypes() {
