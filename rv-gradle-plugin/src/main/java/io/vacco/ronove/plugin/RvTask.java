@@ -57,12 +57,15 @@ public class RvTask extends DefaultTask {
           var reflectTypes = tsCtx.reflectTypes();
           var graalGen = new RvGraalGen();
           if (ext.reflectConfigFile.isPresent()) {
-            write(ext.reflectConfigFile.get().getAsFile(), graalGen.reflectConfig(reflectTypes));
+            write(
+              ext.reflectConfigFile.get().getAsFile(),
+              graalGen.reflectConfig(reflectTypes, controllers)
+            );
           }
           if (ext.reachabilityMetadataFile.isPresent()) {
             write(
               ext.reachabilityMetadataFile.get().getAsFile(),
-              graalGen.reachabilityMetadata(reflectTypes)
+              graalGen.reachabilityMetadata(reflectTypes, controllers)
             );
           }
         }

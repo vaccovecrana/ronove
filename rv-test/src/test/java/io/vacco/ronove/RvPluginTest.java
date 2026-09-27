@@ -153,30 +153,49 @@ public class RvPluginTest {
         () -> {
           var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
           var json = new RvGraalGen().reflectConfig(
-            RvTsContext.from(idx).reflectTypes()
+            RvTsContext.from(idx).reflectTypes(),
+            Collections.singletonList(MyApi.class)
           );
+          System.out.println(json);
           assertTrue(json.startsWith("[\n"));
           assertTrue(json.trim().endsWith("]"));
           assertTrue(json.contains("\"name\": \"io.vacco.ronove.myapi.MyBlogEntry\""));
           assertTrue(json.contains("\"allDeclaredConstructors\": true"));
           assertTrue(json.contains("\"allDeclaredFields\": true"));
           assertTrue(json.contains("\"allDeclaredMethods\": true"));
+          assertTrue(json.contains("\"unsafeAllocated\": true"));
           assertFalse(json.contains("\"name\": \"java."));
           assertFalse(json.contains("\"name\": \"jakarta."));
+        }
+      );
+      it("Registers controller classes with @BeanParam methods for reflection",
+        () -> {
+          var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
+          var json = new RvGraalGen().reflectConfig(
+            RvTsContext.from(idx).reflectTypes(),
+            Collections.singletonList(MyApi.class)
+          );
+          System.out.println(json);
+          assertTrue(json.contains("\"name\": \"io.vacco.ronove.myapi.MyApi\""));
+          assertTrue(json.contains("\"allDeclaredMethods\": true"));
         }
       );
       it("Renders Graal reachability-metadata JSON from resolved types",
         () -> {
           var idx = new RvContext().describe(Collections.singletonList(MyApi.class));
           var json = new RvGraalGen().reachabilityMetadata(
-            RvTsContext.from(idx).reflectTypes()
+            RvTsContext.from(idx).reflectTypes(),
+            Collections.singletonList(MyApi.class)
           );
+          System.out.println(json);
           assertTrue(json.startsWith("{\n  \"reflection\": [\n"));
           assertTrue(json.trim().replaceAll("\\s+", "").endsWith("]}"));
           assertTrue(json.contains("\"type\": \"io.vacco.ronove.myapi.MyBlogEntry\""));
           assertTrue(json.contains("\"allDeclaredConstructors\": true"));
           assertTrue(json.contains("\"allDeclaredFields\": true"));
           assertTrue(json.contains("\"allDeclaredMethods\": true"));
+          assertTrue(json.contains("\"unsafeAllocated\": true"));
+          assertTrue(json.contains("\"type\": \"io.vacco.ronove.myapi.MyApi\""));
           assertFalse(json.contains("\"type\": \"java."));
           assertFalse(json.contains("\"type\": \"jakarta."));
         }

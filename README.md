@@ -72,15 +72,21 @@ The plugin adds `jakarta.ws.rs-api` and registers the `ronoveTypescriptRpc` task
 which scans `controllerClasses` and writes the TS client to `outFile`.
 
 When `reflectConfigFile` and/or `reachabilityMetadataFile` is set, the same task also writes GraalVM
-reflection metadata covering every DTO reachable from the controllers, so JSON (de)serialization works in a
-`native-image` build without running the tracing agent.
+reflection metadata covering every DTO reachable from the controllers **and the controller classes
+themselves**, so route discovery and JSON (de)serialization work in a `native-image` build without running
+the tracing agent. Controller classes are registered so `Class.getMethods()` + `Method.getAnnotations()`
+stay intact at runtime, which is required for controllers whose methods use parameter annotations such as
+`@BeanParam`. Every entry is emitted with `unsafeAllocated` so gson can allocate DTOs through
+`Unsafe.allocateInstance`.
 
 - `reflectConfigFile` emits the classic `reflect-config.json`, a supported input for GraalVM 22+ (and still
   read by 23.x/24.x).
 - `reachabilityMetadataFile` emits the newer `reachability-metadata.json` (GraalVM 23.1+) with the reflection
   entries under a top-level `reflection` array.
 
-Either file can be set independently, or both at once. Place them under
+Either file can be set independently, or both at once. **The files must be named exactly
+`reflect-config.json` / `reachability-metadata.json`** — GraalVM only auto-merges configuration files with
+those canonical names, so a differently-named file is silently ignored. Place them under
 `META-INF/native-image/<group>/<artifact>/` so native-image picks them up from the classpath automatically.
 
 ## Request parameters
