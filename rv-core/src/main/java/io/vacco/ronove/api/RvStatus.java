@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.api;
 
 import jakarta.ws.rs.core.Response;
 

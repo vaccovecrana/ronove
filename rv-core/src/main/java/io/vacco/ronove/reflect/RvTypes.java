@@ -1,11 +1,10 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 
-public class RvPrimitives {
+public class RvTypes {
 
   public static Class<?> toWrapperClass(Class<?> type) {
     if (!type.isPrimitive()) return type;
@@ -67,6 +66,51 @@ public class RvPrimitives {
       return false;
     }
     return String.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isJdkType(Class<?> c) {
+    var pkg = c.getPackage();
+    var p = pkg != null ? pkg.getName() : "";
+    return p.startsWith("java.")
+      || p.startsWith("javax.")
+      || p.startsWith("jdk.")
+      || p.startsWith("sun.")
+      || p.startsWith("jakarta.");
+  }
+
+  /**
+   * Returns the resolved set of application types reachable from an input type
+   * collection, suitable for GraalVM reflection registration. JDK/Jakarta types and types
+   * GraalVM handles out of the box (collections, maps, primitives, String) are
+   * excluded.
+   */
+  public static List<Class<?>> reflectTypes(Collection<Type> types) {
+    var out = new LinkedHashSet<Class<?>>();
+    for (var t : types) {
+      Class<?> c = null;
+      if (t instanceof Class) {
+        c = (Class<?>) t;
+      } else if (t instanceof ParameterizedType) {
+        var raw = ((ParameterizedType) t).getRawType();
+        if (raw instanceof Class) {
+          c = (Class<?>) raw;
+        }
+      }
+      if (c == null
+        || isPrimitiveOrWrapper(c)
+        || isVoid(c)
+        || isString(c)
+        || c.isArray()
+        || isCollection(c)
+        || isMap(c)
+        || isJdkType(c)) {
+        continue;
+      }
+      out.add(c);
+    }
+    var list = new ArrayList<>(out);
+    list.sort(Comparator.comparing(Class::getCanonicalName));
+    return list;
   }
 
   public static Optional<Object> instance(Class<?> fType, String rawValue) {

@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.util;
 
 import java.util.Map;
 import java.util.Objects;

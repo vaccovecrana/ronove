@@ -2,7 +2,10 @@ package io.vacco.ronove.murmux;
 
 import io.vacco.murmux.http.*;
 import io.vacco.murmux.middleware.MxRouter;
-import io.vacco.ronove.*;
+import io.vacco.ronove.api.*;
+import io.vacco.ronove.reflect.RvMethod;
+import io.vacco.ronove.reflect.RvParameter;
+import io.vacco.ronove.util.RvResponse;
 import jakarta.ws.rs.core.Response;
 
 import java.io.ByteArrayInputStream;
@@ -72,7 +75,7 @@ public class RvMxAdapter<Api> extends RvAdapter<Api, MxHandler, MxExchange> {
   }
 
   @Override
-  public void commitResponse(RvDescriptor rvd, Object res, MxExchange x) {
+  public void commitResponse(RvMethod rvd, Object res, MxExchange x) {
     if (rvd.httpStatus != null) {
       x.withStatus(MxStatus.valueOf(rvd.httpStatus.value().getStatusCode()));
     } else {

@@ -1,12 +1,13 @@
 package io.vacco.ronove.plugin;
 
+import io.vacco.ronove.reflect.RvContext;
+import io.vacco.ronove.reflect.RvTypes;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.io.File;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -78,5 +79,22 @@ public class RvGraalGen {
       .collect(Collectors.joining(",\n"));
     return "{\n  \"reflection\": [\n" + body + "\n  ]\n}\n";
   }
+
+  public void reflectConfigFor(RvContext ctx, RvTsContext tsx, File jsonOut) {
+
+  }
+
+  public void reflectConfigFor(List<Class<?>> controllers, File jsonOutFile) {
+    var types = new HashSet<Class<?>>();
+    for (var ctl : controllers) {
+      isGraalTarget(ctl).ifPresent(graal -> {
+        var ctlTypes = new HashSet<Type>(Arrays.asList(graal.value()));
+        var allTypes = RvTypes.reflectTypes(ctlTypes);
+        types.addAll();
+      });
+    }
+  }
+
+  public void reachabilityMetadataFor(List<Class<?>> controllers, File jsonOutFile) {}
 
 }

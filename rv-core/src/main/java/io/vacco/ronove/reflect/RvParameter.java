@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
 import jakarta.ws.rs.DefaultValue;
 

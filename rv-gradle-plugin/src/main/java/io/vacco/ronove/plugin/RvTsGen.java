@@ -2,8 +2,8 @@ package io.vacco.ronove.plugin;
 
 import io.marioslab.basis.template.TemplateContext;
 import io.marioslab.basis.template.TemplateLoader;
-import io.vacco.ronove.RvContext;
-import io.vacco.ronove.RvDescriptor;
+import io.vacco.ronove.reflect.RvContext;
+import io.vacco.ronove.reflect.RvMethod;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
@@ -24,7 +24,7 @@ public class RvTsGen {
     return render(controllers, idx, RvTsContext.from(idx), optionalFields);
   }
 
-  public String render(List<Class<?>> controllers, Map<String, RvDescriptor> idx,
+  public String render(List<Class<?>> controllers, Map<String, RvMethod> idx,
                        RvTsContext tsCtx, boolean optionalFields) {
     log.warn("Generating RPC client from definitions: {}", controllers);
     var context = new TemplateContext();
@@ -46,7 +46,7 @@ public class RvTsGen {
     context.set("rvDescriptors", idx.values());
     context.set("tsSchemaTypes", tsTypes);
     context.set("retFn", (Function<Type, String>) RvTsDeclarations::mapReturn);
-    context.set("paramFn", (Function<RvDescriptor, String>) RvTsDeclarations::mapParams);
+    context.set("paramFn", (Function<RvMethod, String>) RvTsDeclarations::mapParams);
     context.set("optionalFields", optionalFields);
 
     var out = template.render(context);

@@ -1,4 +1,10 @@
-package io.vacco.ronove;
+package io.vacco.ronove.api;
+
+import io.vacco.ronove.reflect.RvContext;
+import io.vacco.ronove.reflect.RvMethod;
+import io.vacco.ronove.reflect.RvParameter;
+import io.vacco.ronove.reflect.RvTypes;
+import io.vacco.ronove.util.RvResponse;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +52,7 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
    * @param xc  the target exchange.
    * @throws Exception for any error.
    */
-  public abstract void commitResponse(RvDescriptor rvd, Object res, Xc xc) throws Exception;
+  public abstract void commitResponse(RvMethod rvd, Object res, Xc xc) throws Exception;
 
   /**
    * Commit a specific response payload. This response may include
@@ -70,18 +76,18 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
 
   private Object valueOrDefault(RvParameter p, String rawValue) {
     if (rawValue != null) {
-      return RvPrimitives
+      return RvTypes
         .instance((Class<?>) p.type, rawValue)
         .orElse(null);
     } else if (p.defaultValue != null) {
-      return RvPrimitives.instance(
+      return RvTypes.instance(
         (Class<?>) p.type, p.defaultValue.value()
       ).orElse(null);
     }
     return null;
   }
 
-  public RvHandler<Xc> link(RvDescriptor rvd) {
+  public RvHandler<Xc> link(RvMethod rvd) {
     var params = new Object[rvd.allParams.size()];
     return new RvHandler<Xc>()
       .withDescriptor(rvd)

@@ -1,5 +1,6 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
+import io.vacco.ronove.api.RvStatus;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -17,7 +18,7 @@ import java.util.stream.Stream;
  * expect one Query string parameter, and one Header parameter
  * originating from an incoming HTTP request.
  */
-public class RvDescriptor {
+public class RvMethod {
 
   public Method javaMethod;
   public Annotation httpMethod;

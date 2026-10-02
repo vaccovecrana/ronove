@@ -1,5 +1,10 @@
-package io.vacco.ronove;
+package io.vacco.ronove.util;
 
+/**
+ * Utility class when maps get overkill.
+ * @param <K> a key
+ * @param <V> a value
+ */
 public class RvPair<K, V> {
 
   public K key;

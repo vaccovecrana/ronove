@@ -1,14 +1,14 @@
 package io.vacco.ronove.plugin;
 
-import io.vacco.ronove.RvAnnotations;
-import io.vacco.ronove.RvDescriptor;
-import io.vacco.ronove.RvResponse;
+import io.vacco.ronove.reflect.RvAnnotations;
+import io.vacco.ronove.reflect.RvMethod;
+import io.vacco.ronove.util.RvResponse;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
-import static io.vacco.ronove.RvPrimitives.*;
+import static io.vacco.ronove.reflect.RvTypes.*;
 import static io.vacco.ronove.plugin.RvTsPrimitives.tsTypes;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
@@ -67,7 +67,7 @@ public class RvTsDeclarations {
     return mapTail(t);
   }
 
-  public static String mapParams(RvDescriptor d) {
+  public static String mapParams(RvMethod d) {
     return d.allParams.stream()
       .filter(prm -> !RvAnnotations.isRvAttachmentParam(prm.paramType))
       .map(prm -> format(

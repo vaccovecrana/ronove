@@ -2,6 +2,8 @@ package io.vacco.ronove;
 
 import com.google.gson.Gson;
 import io.vacco.murmux.Murmux;
+import io.vacco.ronove.api.RvJsonInput;
+import io.vacco.ronove.api.RvJsonOutput;
 import io.vacco.ronove.murmux.RvMxAdapter;
 import io.vacco.ronove.myapi.MyApi;
 import j8spec.annotation.DefinedOrder;

@@ -1,19 +1,28 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
+import io.vacco.ronove.api.RvAttachmentParam;
+import io.vacco.ronove.api.RvStatus;
 import jakarta.ws.rs.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.vacco.ronove.RvAnnotations.*;
+import static io.vacco.ronove.reflect.RvAnnotations.*;
 import static java.lang.String.format;
 
 public class RvContext {
 
-  public final Map<String, RvDescriptor> paths = new TreeMap<>();
+  public final Map<String, RvMethod> paths = new TreeMap<>();
+
+  /*
+   * TODO maaan I really need to properly rewrite this context/controller/method
+   *      metadata generation layer... sigh...
+   */
+  public final Set<Type> reflectTypes = new HashSet<>();
 
   public RvParameter describe(Parameter p, int position) throws Exception {
     var rp = new RvParameter();
@@ -30,13 +39,13 @@ public class RvContext {
     return rp;
   }
 
-  public RvDescriptor describe(Method m, Path p,
-                               Annotation jxRsMethod,
-                               Consumes jxRsConsumes,
-                               Produces jxRsProduces,
-                               RvStatus rvStatus) {
+  public RvMethod describe(Method m, Path p,
+                           Annotation jxRsMethod,
+                           Consumes jxRsConsumes,
+                           Produces jxRsProduces,
+                           RvStatus rvStatus) {
     try {
-      var d = new RvDescriptor();
+      var d = new RvMethod();
       d.path = p;
       d.javaMethod = m;
       d.responseType = m.getGenericReturnType();
@@ -114,7 +123,7 @@ public class RvContext {
     }
   }
 
-  public Map<String, RvDescriptor> describe(List<Class<?>> controllers) {
+  public Map<String, RvMethod> describe(List<Class<?>> controllers) {
     for (var ct : controllers) {
       for (var m : ct.getMethods()) {
         var op = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsPath).findFirst();
@@ -139,6 +148,8 @@ public class RvContext {
           paths.put(pathKey, rd);
         }
       }
+      RvAnnotations.isGraalTarget(ct)
+        .ifPresent(graal -> reflectTypes.addAll(new HashSet<>(Arrays.asList(graal.value()))));
     }
     if (paths.isEmpty()) {
       throw new IllegalStateException(format(
@@ -148,7 +159,7 @@ public class RvContext {
     return paths;
   }
 
-  public Map<String, RvDescriptor> describe(Class<?> controller) {
+  public Map<String, RvMethod> describe(Class<?> controller) {
     return describe(Collections.singletonList(controller));
   }
 
