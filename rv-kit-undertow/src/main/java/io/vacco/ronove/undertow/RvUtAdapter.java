@@ -89,7 +89,7 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
   @Override
   public Object loadBean(RvParameter bp, HttpServerExchange x) {
     var rd = Channels.newReader(x.getRequestChannel(), StandardCharsets.UTF_8);
-    return jIn.fromJson(rd, bp.type);
+    return jIn.fromJson(rd, bp.type.from);
   }
 
   @Override

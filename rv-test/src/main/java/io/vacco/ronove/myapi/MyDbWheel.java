@@ -2,6 +2,6 @@ package io.vacco.ronove.myapi;
 
 public class MyDbWheel {
 
-  private int sizeInInches;
+  public int sizeInInches;
 
 }

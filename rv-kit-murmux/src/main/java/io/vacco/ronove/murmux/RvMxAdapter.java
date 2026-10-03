@@ -62,7 +62,7 @@ public class RvMxAdapter<Api> extends RvAdapter<Api, MxHandler, MxExchange> {
 
   @Override
   public Object loadBean(RvParameter bp, MxExchange x) {
-    return jIn.fromJson(x.io.getRequestBody(), bp.type);
+    return jIn.fromJson(x.io.getRequestBody(), bp.type.from);
   }
 
   @Override

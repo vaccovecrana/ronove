@@ -1,4 +1,4 @@
-package io.vacco.ronove.plugin;
+package io.vacco.ronove.reflect;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -9,30 +9,26 @@ import static java.lang.String.format;
  * Holds metadata for either 1) TS interfaces or 2) TS enums.
  * Nothing else (for now).
  */
-public class RvTsType {
+public class RvType {
 
-  public String name, type;
-  public RvTsType extendz;
+  public String declaration, name;
+  public RvType extendz;
   public Set<String> enumValues = new LinkedHashSet<>();
-  public List<RvTsType> properties = new ArrayList<>();
+  public Map<String, RvType> properties = new LinkedHashMap<>();
   public Type from;
+  public boolean rpc = true;
 
-  public RvTsType(String name, String type, Type from) {
+  public RvType(String declaration, String name, Type from) {
+    this.declaration = declaration;
     this.name = name;
-    this.type = Objects.requireNonNull(type);
     this.from = Objects.requireNonNull(from);
-  }
-
-  public RvTsType withName(String name) {
-    this.name = name;
-    return this;
   }
 
   @Override
   public String toString() {
     return format(
-      "%s: %s%s",
-      name, type,
+      "%s %s [%s] %s",
+      declaration, name, from,
       extendz != null ? format(" <- %s", extendz) : ""
     );
   }
@@ -40,8 +36,8 @@ public class RvTsType {
   @Override
   public boolean equals(Object obj) {
     return
-      obj instanceof RvTsType
-        && ((RvTsType) obj).from.equals(this.from);
+      obj instanceof RvType
+        && ((RvType) obj).from.equals(this.from);
   }
 
   @Override

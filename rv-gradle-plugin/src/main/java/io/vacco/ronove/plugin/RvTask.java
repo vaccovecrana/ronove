@@ -28,17 +28,17 @@ public class RvTask extends DefaultTask {
     return urls;
   }
 
-  private void write(File target, String content) throws IOException {
-    var path = target.toPath();
-    if (path.getParent() != null) {
-      Files.createDirectories(path.getParent());
-    }
-    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
-  }
-
-  private void generateGraalTypes(RvPluginExtension ext, RvContext ctx, RvTsContext tsx) {
-    if (ext.reflectConfigFile.isPresent() || ext.reachabilityMetadataFile.isPresent()) {
-      var graalTypes = new HashSet<Type>();
+  public static void write(String content, File target) {
+    try {
+      var path = target.toPath();
+      if (path.getParent() != null) {
+        Files.createDirectories(path.getParent());
+      }
+      Files.writeString(path, content);
+    } catch (Exception e) {
+      throw new IllegalStateException(String.format(
+        "Unable to write file: %s", target.getAbsolutePath()
+      ), e);
     }
   }
 
@@ -49,17 +49,19 @@ public class RvTask extends DefaultTask {
       var cg = new ClassGraph().verbose().enableAllInfo()
         .acceptClasses(ext.controllerClasses)
         .overrideClassLoaders(ucl);
-      String tsSrc;
+      var tsg = new RvTsGen();
+      var grg = new RvGraalGen();
+      var ctx = new RvContext();
       try (var scanResult = cg.scan()) {
         var controllers = scanResult.getAllClasses().loadClasses();
-        var ctx = new RvContext();
-        var gen = new RvTsGen();
-        var idx = ctx.describe(controllers);
-        var tsx = RvTsContext.from(idx);
-        tsSrc = gen.render(controllers, idx, tsx, ext.optionalFields);
-        generateGraalTypes(ext, ctx, tsx);
+        ctx.describe(controllers);
       }
-      write(ext.outFile.get().getAsFile(), tsSrc);
+      tsg.render(ctx, ext.optionalFields, ext.outFile.get().getAsFile());
+      grg.render(
+        ctx,
+        ext.reflectConfigFile.get().getAsFile(),
+        ext.reachabilityMetadataFile.get().getAsFile()
+      );
     }
   }
 

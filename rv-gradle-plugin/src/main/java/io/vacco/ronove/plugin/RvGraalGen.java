@@ -6,7 +6,9 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
 import java.io.File;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,9 +35,9 @@ public class RvGraalGen {
 
   private static final Logger log = Logging.getLogger(RvGraalGen.class);
 
-  private static String entry(Class<?> c, String key, String indent) {
+  private static String entry(Type t, String key, String indent) {
     return indent + "{\n" +
-      indent + "  \"" + key + "\": \"" + c.getCanonicalName() + "\",\n" +
+      indent + "  \"" + key + "\": \"" + t.getTypeName() + "\",\n" +
       indent + "  \"allDeclaredConstructors\": true,\n" +
       indent + "  \"allDeclaredFields\": true,\n" +
       indent + "  \"allDeclaredMethods\": true,\n" +
@@ -43,21 +45,7 @@ public class RvGraalGen {
       indent + "}";
   }
 
-  private static List<Class<?>> merge(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var out = new LinkedHashSet<Class<?>>();
-    if (controllers != null) {
-      out.addAll(controllers);
-    }
-    if (reflectTypes != null) {
-      out.addAll(reflectTypes);
-    }
-    var list = new ArrayList<>(out);
-    list.sort(Comparator.comparing(Class::getCanonicalName));
-    return list;
-  }
-
-  public String reflectConfig(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var types = merge(reflectTypes, controllers);
+  public String reflectConfig(List<Type> types) {
     log.warn("Generating Graal reflect-config from {} types", types.size());
     if (types.isEmpty()) {
       return "[]\n";
@@ -68,8 +56,7 @@ public class RvGraalGen {
     return "[\n" + body + "\n]\n";
   }
 
-  public String reachabilityMetadata(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var types = merge(reflectTypes, controllers);
+  public String reachabilityMetadata(List<Type> types) {
     log.warn("Generating Graal reachability-metadata from {} types", types.size());
     if (types.isEmpty()) {
       return "{\n  \"reflection\": []\n}\n";
@@ -80,21 +67,20 @@ public class RvGraalGen {
     return "{\n  \"reflection\": [\n" + body + "\n  ]\n}\n";
   }
 
-  public void reflectConfigFor(RvContext ctx, RvTsContext tsx, File jsonOut) {
-
-  }
-
-  public void reflectConfigFor(List<Class<?>> controllers, File jsonOutFile) {
-    var types = new HashSet<Class<?>>();
-    for (var ctl : controllers) {
-      isGraalTarget(ctl).ifPresent(graal -> {
-        var ctlTypes = new HashSet<Type>(Arrays.asList(graal.value()));
-        var allTypes = RvTypes.reflectTypes(ctlTypes);
-        types.addAll();
-      });
+  public void render(RvContext ctx, File rcJsonOutFile, File rmJsonOutFile) {
+    var types = ctx.schemaTypes().stream().map(rvt -> {
+      if (rvt.from instanceof ParameterizedType) {
+        var pt = (ParameterizedType) rvt.from;
+        return pt.getRawType();
+      }
+      return rvt.from;
+    }).toList();
+    if (rcJsonOutFile != null) {
+      RvTask.write(reflectConfig(types), rcJsonOutFile);
+    }
+    if (rmJsonOutFile != null) {
+      RvTask.write(reachabilityMetadata(types), rmJsonOutFile);
     }
   }
-
-  public void reachabilityMetadataFor(List<Class<?>> controllers, File jsonOutFile) {}
 
 }

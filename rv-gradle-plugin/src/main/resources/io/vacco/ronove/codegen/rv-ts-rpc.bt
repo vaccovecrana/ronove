@@ -23,8 +23,8 @@ const doJsonIo = <I, O>(url: string, method: string, body: I,
 /* ============= RPC types ============== */
 /* ====================================== */
 {{for tsType in tsSchemaTypes}}
-export {{tsType.type}} {{tsType.name}}{{if tsType.extendz != null}} extends {{if tsType.extendz.name == null}}{{ tsType.extendz.type }}{{else}}{{ tsType.extendz.name }}{{end}}{{end}} {
-  {{for prop in tsType.properties}}{{prop.name}}{{if optionalFields}}?{{end}}: {{prop.type}}{{";\n  "}}{{end}}
+export {{tsType.declaration}} {{nameGenericRaw.apply(tsType.from)}}{{if tsType.extendz != null}} extends {{ retFn.apply(tsType.extendz.from) }}{{end}} {
+  {{for prop, rvt in tsType.properties}}{{prop}}{{if optionalFields}}?{{end}}: {{retFn.apply(rvt.from)}}{{";\n  "}}{{end}}
   {{for enumVal in tsType.enumValues}}{{enumVal}} = "{{enumVal}}",{{"\n  "}}{{end}}
 }
 {{end}}
@@ -39,7 +39,7 @@ Source controllers:
 {{for ctl in rvControllers}}- {{ctl}}{{"\n"}}{{end}}
  */
 {{for rvd in rvDescriptors}}
-export const {{rvd.javaMethod.getName()}} = ({{paramFn.apply(rvd)}}): Promise<{{retFn.apply(rvd.responseType)}}> => {
+export const {{rvd.javaMethod.getName()}} = ({{paramFn.apply(rvd)}}): Promise<{{retFn.apply(rvd.responseType.from)}}> => {
   let path = "{{rvd.path.value()}}"
   {{for pp in rvd.pathParams}}
   path = path.replace("\{ {{pp.name}} \}".replace(/\s+/g, ""), {{pp.name}}.toString()){{"\n  "}}

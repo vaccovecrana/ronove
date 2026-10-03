@@ -17,7 +17,7 @@ import java.util.TreeMap;
 
 import static java.util.Objects.requireNonNull;
 
-@RvGraal({ MyDbCar.class })
+@RvGraal(include = { MyDbCar.class }, rpc = true)
 public class MyApi {
 
   public static final String v1ApiPing = "/v1/api/ping";

@@ -1,9 +1,6 @@
 package io.vacco.ronove.api;
 
-import io.vacco.ronove.reflect.RvContext;
-import io.vacco.ronove.reflect.RvMethod;
-import io.vacco.ronove.reflect.RvParameter;
-import io.vacco.ronove.reflect.RvTypes;
+import io.vacco.ronove.reflect.*;
 import io.vacco.ronove.util.RvResponse;
 
 import java.util.List;
@@ -77,11 +74,11 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
   private Object valueOrDefault(RvParameter p, String rawValue) {
     if (rawValue != null) {
       return RvTypes
-        .instance((Class<?>) p.type, rawValue)
+        .instance((Class<?>) p.type.from, rawValue)
         .orElse(null);
     } else if (p.defaultValue != null) {
       return RvTypes.instance(
-        (Class<?>) p.type, p.defaultValue.value()
+        (Class<?>) p.type.from, p.defaultValue.value()
       ).orElse(null);
     }
     return null;

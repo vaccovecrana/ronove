@@ -7,7 +7,6 @@ import jakarta.ws.rs.Produces;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ public class RvMethod {
   public String httpMethodTxt;
   public RvStatus httpStatus;
   public Path path;
-  public Type responseType;
+  public RvType responseType;
 
   public RvParameter beanParam;
   public List<RvParameter> pathParams = new ArrayList<>();
@@ -38,12 +37,16 @@ public class RvMethod {
   public List<RvParameter> attachmentParams = new ArrayList<>();
   public List<RvParameter> allParams = new ArrayList<>();
 
-  @Override
-  public String toString() {
+  public String id() {
     return String.format("(%s) %s", httpMethodTxt, path);
   }
 
-  public Stream<Type> allTypes() {
+  @Override
+  public String toString() {
+    return id();
+  }
+
+  public Stream<RvType> allTypes() {
     return Stream.concat(
       Stream.of(responseType),
       allParams.stream().map(rp -> rp.type)

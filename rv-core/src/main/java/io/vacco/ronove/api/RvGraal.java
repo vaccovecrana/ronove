@@ -12,5 +12,17 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RvGraal {
-  Class<?>[] value() default {};
+
+  /**
+   * @return the classes to include in reflection metadata
+   */
+  Class<?>[] include() default {};
+
+  /**
+   * @return
+   *   <code>true</code> if these classes should also get included
+   *   in TS RPC definitions, <code>false</code> otherwise.
+   */
+  boolean rpc() default false;
+
 }
