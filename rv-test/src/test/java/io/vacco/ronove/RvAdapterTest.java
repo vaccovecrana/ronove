@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 
 import static j8spec.J8Spec.describe;
 import static j8spec.J8Spec.it;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @DefinedOrder
 @RunWith(J8SpecRunner.class)
@@ -26,19 +27,57 @@ public class RvAdapterTest {
   private static class CapturingAdapter extends RvAdapter<List<RvHandler<Object>>, Object> {
 
     private CapturingAdapter() {
-      super((xc, e) -> {});
+      super((xc, e) -> {
+      });
     }
 
-    @Override public String loadPath(RvParameter pp, Object xc) { return null; }
-    @Override public String loadQuery(RvParameter qp, Object xc) { return null; }
-    @Override public String loadCookie(RvParameter cp, Object xc) { return null; }
-    @Override public String loadForm(RvParameter fp, Object xc) { return null; }
-    @Override public String loadHeader(RvParameter hp, Object xc) { return null; }
-    @Override public Object loadAttachment(RvParameter ap, RvAttachmentParam at, Object xc) { return null; }
-    @Override public Object loadBean(RvParameter bp, Object xc) { return null; }
-    @Override public List<RvHandler<Object>> combine(List<RvHandler<Object>> handlers) { return handlers; }
-    @Override public void commitResponse(RvMethod rvd, Object res, Object xc) { }
-    @Override public void commitResponse(RvResponse<?> res, Object xc) { }
+    @Override
+    public String loadPath(RvParameter pp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public String loadQuery(RvParameter qp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public String loadCookie(RvParameter cp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public String loadForm(RvParameter fp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public String loadHeader(RvParameter hp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public Object loadAttachment(RvParameter ap, RvAttachmentParam at, Object xc) {
+      return null;
+    }
+
+    @Override
+    public Object loadBean(RvParameter bp, Object xc) {
+      return null;
+    }
+
+    @Override
+    public List<RvHandler<Object>> combine(List<RvHandler<Object>> handlers) {
+      return handlers;
+    }
+
+    @Override
+    public void commitResponse(RvMethod rvd, Object res, Object xc) {
+    }
+
+    @Override
+    public void commitResponse(RvResponse<?> res, Object xc) {
+    }
   }
 
   static {
