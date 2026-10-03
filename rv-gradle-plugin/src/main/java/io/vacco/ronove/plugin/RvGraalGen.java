@@ -1,12 +1,15 @@
 package io.vacco.ronove.plugin;
 
+import io.vacco.ronove.reflect.RvContext;
+import io.vacco.ronove.reflect.RvTypes;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.io.File;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,9 +35,9 @@ public class RvGraalGen {
 
   private static final Logger log = Logging.getLogger(RvGraalGen.class);
 
-  private static String entry(Class<?> c, String key, String indent) {
+  private static String entry(Type t, String key, String indent) {
     return indent + "{\n" +
-      indent + "  \"" + key + "\": \"" + c.getCanonicalName() + "\",\n" +
+      indent + "  \"" + key + "\": \"" + t.getTypeName() + "\",\n" +
       indent + "  \"allDeclaredConstructors\": true,\n" +
       indent + "  \"allDeclaredFields\": true,\n" +
       indent + "  \"allDeclaredMethods\": true,\n" +
@@ -42,21 +45,7 @@ public class RvGraalGen {
       indent + "}";
   }
 
-  private static List<Class<?>> merge(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var out = new LinkedHashSet<Class<?>>();
-    if (controllers != null) {
-      out.addAll(controllers);
-    }
-    if (reflectTypes != null) {
-      out.addAll(reflectTypes);
-    }
-    var list = new ArrayList<>(out);
-    list.sort(Comparator.comparing(Class::getCanonicalName));
-    return list;
-  }
-
-  public String reflectConfig(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var types = merge(reflectTypes, controllers);
+  public String reflectConfig(List<Type> types) {
     log.warn("Generating Graal reflect-config from {} types", types.size());
     if (types.isEmpty()) {
       return "[]\n";
@@ -67,8 +56,7 @@ public class RvGraalGen {
     return "[\n" + body + "\n]\n";
   }
 
-  public String reachabilityMetadata(List<Class<?>> reflectTypes, List<Class<?>> controllers) {
-    var types = merge(reflectTypes, controllers);
+  public String reachabilityMetadata(List<Type> types) {
     log.warn("Generating Graal reachability-metadata from {} types", types.size());
     if (types.isEmpty()) {
       return "{\n  \"reflection\": []\n}\n";
@@ -77,6 +65,22 @@ public class RvGraalGen {
       .map(c -> entry(c, "type", "    "))
       .collect(Collectors.joining(",\n"));
     return "{\n  \"reflection\": [\n" + body + "\n  ]\n}\n";
+  }
+
+  public void render(RvContext ctx, File rcJsonOutFile, File rmJsonOutFile) {
+    var types = ctx.schemaTypes().stream().map(rvt -> {
+      if (rvt.from instanceof ParameterizedType) {
+        var pt = (ParameterizedType) rvt.from;
+        return pt.getRawType();
+      }
+      return rvt.from;
+    }).toList();
+    if (rcJsonOutFile != null) {
+      RvTask.write(reflectConfig(types), rcJsonOutFile);
+    }
+    if (rmJsonOutFile != null) {
+      RvTask.write(reachabilityMetadata(types), rmJsonOutFile);
+    }
   }
 
 }

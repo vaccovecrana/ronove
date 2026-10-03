@@ -6,7 +6,10 @@ import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.util.AttachmentKey;
 import io.undertow.util.HttpString;
-import io.vacco.ronove.*;
+import io.vacco.ronove.api.*;
+import io.vacco.ronove.reflect.RvMethod;
+import io.vacco.ronove.reflect.RvParameter;
+import io.vacco.ronove.util.RvResponse;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -86,7 +89,7 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
   @Override
   public Object loadBean(RvParameter bp, HttpServerExchange x) {
     var rd = Channels.newReader(x.getRequestChannel(), StandardCharsets.UTF_8);
-    return jIn.fromJson(rd, bp.type);
+    return jIn.fromJson(rd, bp.type.from);
   }
 
   @Override
@@ -101,7 +104,7 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
   }
 
   @Override
-  public void commitResponse(RvDescriptor rvd,
+  public void commitResponse(RvMethod rvd,
                              Object res, HttpServerExchange x) throws Exception {
     if (rvd.httpStatus != null) {
       x.setStatusCode(rvd.httpStatus.value().getStatusCode());

@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
 import jakarta.ws.rs.DefaultValue;
 
@@ -13,7 +13,7 @@ public class RvParameter {
 
   public int position;
   public String name;
-  public Type type;
+  public RvType type;
 
   public Annotation paramType;
   public DefaultValue defaultValue;

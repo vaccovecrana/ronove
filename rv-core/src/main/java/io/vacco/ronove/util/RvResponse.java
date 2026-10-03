@@ -1,4 +1,4 @@
-package io.vacco.ronove;
+package io.vacco.ronove.util;
 
 import com.sun.net.httpserver.Headers;
 import jakarta.ws.rs.core.Response;

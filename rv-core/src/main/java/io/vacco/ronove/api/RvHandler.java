@@ -1,14 +1,16 @@
-package io.vacco.ronove;
+package io.vacco.ronove.api;
+
+import io.vacco.ronove.reflect.RvMethod;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class RvHandler<Xc> {
 
-  public RvDescriptor descriptor;
+  public RvMethod descriptor;
   public Consumer<Xc> consumer;
 
-  public RvHandler<Xc> withDescriptor(RvDescriptor descriptor) {
+  public RvHandler<Xc> withDescriptor(RvMethod descriptor) {
     this.descriptor = Objects.requireNonNull(descriptor);
     return this;
   }

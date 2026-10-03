@@ -1,11 +1,52 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
-public class RvPrimitives {
+public class RvTypes {
+
+  private static final String any = "any";
+  private static final String tVoid = "void";
+  private static final String tBoolean = "boolean";
+  private static final String number = "number";
+  private static final String string = "string";
+  private static final String date = "Date";
+
+  public static final Map<Class<?>, String> tsTypes = new HashMap<>();
+
+  static {
+    tsTypes.put(Void.class, tVoid);
+    tsTypes.put(void.class, tVoid);
+    tsTypes.put(Object.class, any);
+
+    tsTypes.put(byte.class, number);
+    tsTypes.put(Byte.class, number);
+    tsTypes.put(short.class, number);
+    tsTypes.put(Short.class, number);
+    tsTypes.put(int.class, number);
+    tsTypes.put(Integer.class, number);
+    tsTypes.put(long.class, number);
+    tsTypes.put(Long.class, number);
+    tsTypes.put(float.class, number);
+    tsTypes.put(Float.class, number);
+    tsTypes.put(double.class, number);
+    tsTypes.put(Double.class, number);
+
+    tsTypes.put(boolean.class, tBoolean);
+    tsTypes.put(Boolean.class, tBoolean);
+
+    tsTypes.put(char.class, string);
+    tsTypes.put(Character.class, string);
+
+    tsTypes.put(String.class, string);
+    tsTypes.put(BigDecimal.class, number);
+    tsTypes.put(BigInteger.class, number);
+    tsTypes.put(Date.class, date);
+    tsTypes.put(UUID.class, string);
+  }
 
   public static Class<?> toWrapperClass(Class<?> type) {
     if (!type.isPrimitive()) return type;
@@ -51,10 +92,6 @@ public class RvPrimitives {
     return clazz != null && Collection.class.isAssignableFrom(clazz);
   }
 
-  public static boolean isMap(Class<?> clazz) {
-    return clazz != null && Map.class.isAssignableFrom(clazz);
-  }
-
   public static boolean isVoid(Class<?> clazz) {
     if (clazz == null) {
       return false;
@@ -67,6 +104,24 @@ public class RvPrimitives {
       return false;
     }
     return String.class.isAssignableFrom(clazz);
+  }
+
+  public static Optional<Type> superClass(Class<?> c) {
+    if (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
+      if (c.getSuperclass() != c.getGenericSuperclass()) {
+        return Optional.of(c.getGenericSuperclass());
+      } else {
+        return Optional.of(c.getSuperclass());
+      }
+    }
+    return Optional.empty();
+  }
+
+  public static Type[] genericTypesOf(ParameterizedType pt) {
+    if (pt.getRawType() instanceof Class) {
+      return pt.getActualTypeArguments();
+    }
+    return new Type[0];
   }
 
   public static Optional<Object> instance(Class<?> fType, String rawValue) {

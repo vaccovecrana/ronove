@@ -1,23 +1,37 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
+import io.vacco.ronove.api.RvAttachmentParam;
+import io.vacco.ronove.api.RvGraal;
+import io.vacco.ronove.api.RvStatus;
 import jakarta.ws.rs.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.vacco.ronove.RvAnnotations.*;
+import static io.vacco.ronove.reflect.RvAnnotations.*;
+import static io.vacco.ronove.reflect.RvAnnotations.defaultValueOf;
 import static java.lang.String.format;
 
-public class RvContext {
+public class RvController {
 
-  public final Map<String, RvDescriptor> paths = new TreeMap<>();
+  public final Class<?> clazz;
+  public final Map<String, RvMethod> methods;
+  private final RvTypeCache typeCache;
 
-  public RvParameter describe(Parameter p, int position) throws Exception {
+  public RvController(Class<?> clazz, RvTypeCache typeCache) {
+    this.clazz = Objects.requireNonNull(clazz);
+    this.typeCache = Objects.requireNonNull(typeCache);
+    this.methods = describe(clazz);
+  }
+
+  private RvParameter describe(Parameter p, int position) throws Exception {
     var rp = new RvParameter();
-    var t = p.getParameterizedType();
+    var t = typeCache.get(p.getParameterizedType());
     var pt = paramTypeOf(p);
     var pName = isJaxRsBodyParam(pt)
       ? p.getName()
@@ -30,16 +44,14 @@ public class RvContext {
     return rp;
   }
 
-  public RvDescriptor describe(Method m, Path p,
-                               Annotation jxRsMethod,
-                               Consumes jxRsConsumes,
-                               Produces jxRsProduces,
-                               RvStatus rvStatus) {
+  private RvMethod describe(Method m, Path p, Annotation jxRsMethod,
+                            Consumes jxRsConsumes, Produces jxRsProduces,
+                            RvStatus rvStatus) {
     try {
-      var d = new RvDescriptor();
+      var d = new RvMethod();
       d.path = p;
       d.javaMethod = m;
-      d.responseType = m.getGenericReturnType();
+      d.responseType = typeCache.get(m.getGenericReturnType());
       d.httpStatus = rvStatus;
       d.consumes = jxRsConsumes;
       d.produces = jxRsProduces;
@@ -114,42 +126,65 @@ public class RvContext {
     }
   }
 
-  public Map<String, RvDescriptor> describe(List<Class<?>> controllers) {
-    for (var ct : controllers) {
-      for (var m : ct.getMethods()) {
-        var op = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsPath).findFirst();
-        var oJxm = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsMethod).findFirst();
-        var oJxc = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsConsumes).findFirst();
-        var oJxp = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsProduces).findFirst();
-        var oRvStat = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isRvStatus).findFirst();
-        if (op.isPresent() && oJxm.isPresent()) {
-          var rd = describe(
-            m, (Path) op.get(), oJxm.get(),
-            (Consumes) oJxc.orElse(null),
-            (Produces) oJxp.orElse(null),
-            (RvStatus) oRvStat.orElse(null)
-          );
-          var pathKey = format("%s:%s", rd.httpMethodTxt, rd.path.value());
-          if (paths.containsKey(pathKey)) {
-            throw new IllegalStateException(format(
-              "Request path [%s] mapped multiple times by [%s] and [%s]",
-              pathKey, rd, paths.get(pathKey)
-            ));
+  private void markRpc(RvType t, boolean rpc) {
+    t.rpc = rpc;
+    for (var pvt : t.properties.values()) {
+      markRpc(pvt, rpc);
+      if (pvt.from instanceof ParameterizedType) {
+        var jpt = (ParameterizedType) pvt.from;
+        for (var pta : jpt.getActualTypeArguments()) {
+          var rpt = typeCache.get(pta);
+          if (rpt != null) {
+            rpt.rpc = rpc;
           }
-          paths.put(pathKey, rd);
         }
       }
     }
-    if (paths.isEmpty()) {
-      throw new IllegalStateException(format(
-        "No handler methods found for controller classes: %s", controllers
-      ));
-    }
-    return paths;
   }
 
-  public Map<String, RvDescriptor> describe(Class<?> controller) {
-    return describe(Collections.singletonList(controller));
+  private Map<String, RvMethod> describe(Class<?> ct) {
+    var out = new TreeMap<String, RvMethod>();
+    var grl = ct.getAnnotation(RvGraal.class);
+    if (grl != null) {
+      for (var reflectClass : grl.include()) {
+        var gt = typeCache.get(reflectClass);
+        markRpc(gt, grl.rpc());
+      }
+    }
+    for (var m : ct.getMethods()) {
+      var op = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsPath).findFirst();
+      var oJxm = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsMethod).findFirst();
+      var oJxc = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsConsumes).findFirst();
+      var oJxp = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsProduces).findFirst();
+      var oRvStat = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isRvStatus).findFirst();
+      if (op.isPresent() && oJxm.isPresent()) {
+        var rd = describe(
+          m, (Path) op.get(), oJxm.get(),
+          (Consumes) oJxc.orElse(null),
+          (Produces) oJxp.orElse(null),
+          (RvStatus) oRvStat.orElse(null)
+        );
+        if (out.containsKey(rd.id())) {
+          var rd1 = out.get(rd.id());
+          throw new IllegalStateException(format(
+            "Request path [%s] mapped by methods [%s] and [%s]",
+            rd.id(), rd.javaMethod, rd1.javaMethod
+          ));
+        }
+        out.put(rd.id(), rd);
+      }
+    }
+    if (out.isEmpty()) {
+      throw new IllegalStateException(format(
+        "Controller class [%s] describes no REST methods", ct
+      ));
+    }
+    return out;
+  }
+
+  @Override
+  public String toString() {
+    return clazz.getCanonicalName();
   }
 
 }

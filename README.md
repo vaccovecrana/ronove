@@ -135,6 +135,7 @@ those canonical names, so a differently-named file is silently ignored. Place th
 ## Rules
 
 - DTO parameters do not support inheritance (keeps code generation simple).
+- Only `public` DTO fields will be exposed as TypeScript interface fields.
 - Non-body methods (`GET`, `DELETE`, `HEAD`, `OPTIONS`) cannot take `@BeanParam` or `@FormParam`.
 - `@BeanParam` and `@FormParam` are mutually exclusive.
 - Each `(HTTP method, path)` pair must be unique.

@@ -1,5 +1,8 @@
-package io.vacco.ronove;
+package io.vacco.ronove.reflect;
 
+import io.vacco.ronove.api.RvAttachmentParam;
+import io.vacco.ronove.api.RvGraal;
+import io.vacco.ronove.api.RvStatus;
 import jakarta.ws.rs.*;
 
 import java.lang.annotation.Annotation;
@@ -57,6 +60,11 @@ public class RvAnnotations {
 
   public static boolean isRvAttachmentParam(Annotation an) {
     return RvAttachmentParam.class.isAssignableFrom(an.getClass());
+  }
+
+  public static Optional<RvGraal> isGraalTarget(Class<?> controller) {
+    var ann = controller.getAnnotation(RvGraal.class);
+    return ann == null ? Optional.empty() : Optional.of(ann);
   }
 
   public static Annotation paramTypeOf(Parameter p) {
