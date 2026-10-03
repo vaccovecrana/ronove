@@ -6,6 +6,7 @@ import io.vacco.ronove.api.RvJsonInput;
 import io.vacco.ronove.api.RvJsonOutput;
 import io.vacco.ronove.murmux.RvMxAdapter;
 import io.vacco.ronove.myapi.MyApi;
+import io.vacco.ronove.myapi.MyEdgeApi;
 import j8spec.annotation.DefinedOrder;
 import j8spec.junit.J8SpecRunner;
 import org.junit.runner.RunWith;
@@ -28,7 +29,8 @@ public class RvMxAdapterTest {
       var jIn = (RvJsonInput) g::fromJson;
       var jOut = (RvJsonOutput) g::toJson;
       var sesHdl = new MxMySession();
-      var mxBookApi = new RvMxAdapter<>(new MyApi(), (xc, e) -> log.error("Err", e), jIn, jOut).build();
+      var mxBookApi = new RvMxAdapter((xc, e) -> log.error("Err", e), jIn, jOut)
+        .build(new MyApi(), new MyEdgeApi());
       mx = new Murmux().rootHandler(xc -> {
         log.info("[{}] {}", xc.method, xc.getPath());
         sesHdl.handle(xc);

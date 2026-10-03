@@ -10,6 +10,7 @@ import io.undertow.util.AttachmentKey;
 import io.vacco.ronove.api.RvJsonInput;
 import io.vacco.ronove.api.RvJsonOutput;
 import io.vacco.ronove.myapi.MyApi;
+import io.vacco.ronove.myapi.MyEdgeApi;
 import io.vacco.ronove.myapi.MyUser;
 import io.vacco.ronove.undertow.RvUtAdapter;
 import io.vacco.ronove.undertow.RvUtAttachmentKey;
@@ -47,7 +48,8 @@ public class RvUtAdapterTest {
       var uk = new RvUtAttachmentKey<MyUser>()
         .withType(MyUser.class)
         .withKey(AttachmentKey.create(MyUser.class));
-      var utBookApi = new RvUtAdapter<>(new MyApi(), errorHdl, jIn, jOut, uk).build();
+      var utBookApi = new RvUtAdapter(errorHdl, jIn, jOut, uk)
+        .build(new MyApi(), new MyEdgeApi());
       var sessionHdl = (HttpHandler) xc -> {
         // Perform some sort of authentication in a parent handler,
         // place a derived object, and retrieve it here.

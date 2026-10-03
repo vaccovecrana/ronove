@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -57,11 +56,13 @@ public class RvTask extends DefaultTask {
         ctx.describe(controllers);
       }
       tsg.render(ctx, ext.optionalFields, ext.outFile.get().getAsFile());
-      grg.render(
-        ctx,
-        ext.reflectConfigFile.get().getAsFile(),
-        ext.reachabilityMetadataFile.get().getAsFile()
-      );
+      if (ext.reflectConfigFile.isPresent() || ext.reachabilityMetadataFile.isPresent()) {
+        grg.render(
+          ctx,
+          ext.reflectConfigFile.isPresent() ? ext.reflectConfigFile.get().getAsFile() : null,
+          ext.reachabilityMetadataFile.isPresent() ? ext.reachabilityMetadataFile.get().getAsFile() : null
+        );
+      }
     }
   }
 

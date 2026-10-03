@@ -2,7 +2,8 @@
 
 [ronove](https://en.wikipedia.org/wiki/Ronove) is a Gradle plugin + adapter kit for minimal web applications.
 
-One annotated Jakarta REST controller class is the single source of truth for both the **HTTP server** and the **generated TypeScript RPC client**.
+One annotated Jakarta REST controller class is the single source of truth for both the **HTTP server** and the *
+*generated TypeScript RPC client**.
 
 ## Modules
 
@@ -36,18 +37,21 @@ public class MyApi {
 }
 ```
 
-Wire it with an adapter — the `build()` call turns the controller into a request handler:
+Wire it with an adapter — the `build(...)` call turns one or more controller instances into a request
+handler:
 
 ```java
 var g = new Gson();
 var jIn = (RvJsonInput) g::fromJson;
 var jOut = (RvJsonOutput) g::toJson;
-var api = new RvMxAdapter<>(new MyApi(), (xc, e) -> log.error("Err", e), jIn, jOut).build();
+var api = new RvMxAdapter((xc, e) -> log.error("Err", e), jIn, jOut).build(new MyApi());
 new Murmux().rootHandler(api::handle).listen(8080);
 ```
 
-Undertow wiring is analogous: `new RvUtAdapter<>(api, errorHandler, jIn, jOut, attachmentKeys...).build()`,
-with `@RvAttachmentParam` keys declared via `RvUtAttachmentKey`.
+`build(...)` accepts any number of controller instances; `(HTTP method, path)` pairs must be unique across
+all of them. Undertow wiring is analogous:
+`new RvUtAdapter(errorHandler, jIn, jOut, attachmentKeys...).build(new MyApi(), new OtherApi())`, with
+`@RvAttachmentParam` keys declared via `RvUtAttachmentKey`.
 
 ## Gradle setup
 
@@ -58,13 +62,17 @@ ronove {
   outFile.set(layout.projectDirectory.file("src/web/rpc.ts"))
   optionalFields = false
   // optional: emit GraalVM reflection metadata for the same DTO type graph
-  reflectConfigFile.set(layout.projectDirectory.file(
-    "src/main/resources/META-INF/native-image/com.example/app/reflect-config.json"
-  ))
+  reflectConfigFile.set(
+    layout.projectDirectory.file(
+      "src/main/resources/META-INF/native-image/com.example/app/reflect-config.json"
+    )
+  )
   // optional: emit the newer GraalVM 23.1+ reachability metadata instead
-  reachabilityMetadataFile.set(layout.projectDirectory.file(
-    "src/main/resources/META-INF/native-image/com.example/app/reachability-metadata.json"
-  ))
+  reachabilityMetadataFile.set(
+    layout.projectDirectory.file(
+      "src/main/resources/META-INF/native-image/com.example/app/reachability-metadata.json"
+    )
+  )
 }
 ```
 
@@ -88,6 +96,25 @@ Either file can be set independently, or both at once. **The files must be named
 `reflect-config.json` / `reachability-metadata.json`** — GraalVM only auto-merges configuration files with
 those canonical names, so a differently-named file is silently ignored. Place them under
 `META-INF/native-image/<group>/<artifact>/` so native-image picks them up from the classpath automatically.
+
+## GraalVM metadata opt-in
+
+`@RvGraal` on a controller registers additional server-side classes for reflection
+(internal DTOs, DB models, etc.) that are not reachable from any RPC signature:
+
+```java
+@RvGraal(include = { MyDbCar.class }, rpc = true)
+public class MyApi { /* ... */ }
+```
+
+- `include` lists extra classes to register for native-image reflection.
+- `rpc` controls whether those classes are also emitted as TypeScript interfaces.
+  With the default `rpc = false`, they are registered for GraalVM only and never
+  leak into the generated TS client.
+
+Attachment parameter types (`@RvAttachmentParam`) are always treated as server-side
+internals: they are registered for GraalVM but omitted from the TS schema unless they
+are also reachable from a response or request body type.
 
 ## Request parameters
 
@@ -142,6 +169,19 @@ those canonical names, so a differently-named file is silently ignored. Place th
 - Every `@PathParam` must appear in the method's `@Path`.
 - A controller with no handler methods is an error.
 
+## Known limitations
+
+The type mapper intentionally covers only plain DTOs with public fields:
+
+- Raw (non-generic) collection fields map to an empty TypeScript type.
+- Wildcard (`List<?>`, `? extends T`) and generic-array (`T[]`) fields are not
+  supported and fail type mapping.
+- Two distinct Java classes whose simple names collide cannot both be emitted to
+  TypeScript; generation fails fast with a `TypeScript interface name clash` error.
+- Body (`@BeanParam`) parameter names in the generated client require compiling with
+  `-parameters`; otherwise the compiler reports `arg0`.
+- Overloaded controller methods sharing a Java name produce duplicate TS exports.
+
 ## Results and validations
 
 Controllers may return any object; when the object extends `RvResult` the
@@ -152,7 +192,14 @@ validation is a locale-agnostic contract between backend and frontend:
 {
   "error": null,
   "validations": [
-    { "name": "registrationAge", "key": "app.i18n.ageValidationFailed", "params": { "minAge": "18", "maxAge": "39" } }
+    {
+      "name": "registrationAge",
+      "key": "app.i18n.ageValidationFailed",
+      "params": {
+        "minAge": "18",
+        "maxAge": "39"
+      }
+    }
   ]
 }
 ```
@@ -182,7 +229,16 @@ interfaces for every referenced type. Fields are optional when
 
 ```ts
 const data = await v1Echo(42);          // GET /v1/echo/42
-await update({ field: "value" });       // POST /v1/update (JSON body)
+await update({field: "value"});       // POST /v1/update (JSON body)
+```
+
+The `rv-test` module type-checks the generated clients with the TypeScript 7
+native (`tsc`) compiler. The test suite writes them to
+`rv-test/build/generated/ronove/`, and the `typescriptVerify` task (wired into
+`check`) fails the build if `tsc` reports any error:
+
+```
+gradle :rv-test:typescriptVerify
 ```
 
 See runnable examples at [rv-test](./rv-test/src/test/java/io/vacco/ronove).

@@ -19,9 +19,8 @@ public @interface RvGraal {
   Class<?>[] include() default {};
 
   /**
-   * @return
-   *   <code>true</code> if these classes should also get included
-   *   in TS RPC definitions, <code>false</code> otherwise.
+   * @return <code>true</code> if these classes should also get included
+   * in TS RPC definitions, <code>false</code> otherwise.
    */
   boolean rpc() default false;
 

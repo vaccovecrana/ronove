@@ -3,7 +3,6 @@ package io.vacco.ronove.reflect;
 import jakarta.ws.rs.DefaultValue;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 /**
  * Defines the relationship between a Java method's arguments and

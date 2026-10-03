@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExchange> {
+public class RvUtAdapter extends RvAdapter<HttpHandler, HttpServerExchange> {
 
   private static final HttpString HContentType = HttpString.tryFromString("Content-Type");
   private static final HttpString HContentLength = HttpString.tryFromString("Content-Length");
@@ -33,9 +33,9 @@ public class RvUtAdapter<Api> extends RvAdapter<Api, HttpHandler, HttpServerExch
   private final RvJsonInput jIn;
   private final RvJsonOutput jOut;
 
-  public RvUtAdapter(Api api, BiConsumer<HttpServerExchange, Exception> errorHandler,
+  public RvUtAdapter(BiConsumer<HttpServerExchange, Exception> errorHandler,
                      RvJsonInput jIn, RvJsonOutput jOut, RvUtAttachmentKey<?>... attachmentKeys) {
-    super(api, errorHandler);
+    super(errorHandler);
     this.jIn = Objects.requireNonNull(jIn);
     this.jOut = Objects.requireNonNull(jOut);
     for (var ak : attachmentKeys) {

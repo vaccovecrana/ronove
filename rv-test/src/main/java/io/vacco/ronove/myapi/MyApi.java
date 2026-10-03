@@ -2,22 +2,18 @@ package io.vacco.ronove.myapi;
 
 import io.vacco.ronove.api.RvAttachmentParam;
 import io.vacco.ronove.api.RvGraal;
-import io.vacco.ronove.util.RvResponse;
 import io.vacco.ronove.api.RvStatus;
 import io.vacco.ronove.plugin.OtAssignmentList;
+import io.vacco.ronove.util.RvResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-@RvGraal(include = { MyDbCar.class }, rpc = true)
+@RvGraal(include = {MyDbCar.class}, rpc = true)
 public class MyApi {
 
   public static final String v1ApiPing = "/v1/api/ping";

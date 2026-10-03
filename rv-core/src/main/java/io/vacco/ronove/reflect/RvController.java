@@ -14,18 +14,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vacco.ronove.reflect.RvAnnotations.*;
-import static io.vacco.ronove.reflect.RvAnnotations.defaultValueOf;
 import static java.lang.String.format;
 
 public class RvController {
 
   public final Class<?> clazz;
   public final Map<String, RvMethod> methods;
+  public final RvGraal graal;
   private final RvTypeCache typeCache;
 
   public RvController(Class<?> clazz, RvTypeCache typeCache) {
     this.clazz = Objects.requireNonNull(clazz);
     this.typeCache = Objects.requireNonNull(typeCache);
+    this.graal = clazz.getAnnotation(RvGraal.class);
     this.methods = describe(clazz);
   }
 
@@ -126,31 +127,8 @@ public class RvController {
     }
   }
 
-  private void markRpc(RvType t, boolean rpc) {
-    t.rpc = rpc;
-    for (var pvt : t.properties.values()) {
-      markRpc(pvt, rpc);
-      if (pvt.from instanceof ParameterizedType) {
-        var jpt = (ParameterizedType) pvt.from;
-        for (var pta : jpt.getActualTypeArguments()) {
-          var rpt = typeCache.get(pta);
-          if (rpt != null) {
-            rpt.rpc = rpc;
-          }
-        }
-      }
-    }
-  }
-
   private Map<String, RvMethod> describe(Class<?> ct) {
     var out = new TreeMap<String, RvMethod>();
-    var grl = ct.getAnnotation(RvGraal.class);
-    if (grl != null) {
-      for (var reflectClass : grl.include()) {
-        var gt = typeCache.get(reflectClass);
-        markRpc(gt, grl.rpc());
-      }
-    }
     for (var m : ct.getMethods()) {
       var op = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsPath).findFirst();
       var oJxm = Arrays.stream(m.getAnnotations()).filter(RvAnnotations::isJaxRsMethod).findFirst();

@@ -6,13 +6,14 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
+import static io.vacco.ronove.reflect.RvTypes.*;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
-
-import static io.vacco.ronove.reflect.RvTypes.*;
 
 public class RvTypeCache {
 
@@ -87,20 +88,65 @@ public class RvTypeCache {
     return nameTail(t);
   }
 
-  private RvType mapEnum(Class<?> c, Type t) {
-    var tse = new RvType("const enum", c.getSimpleName(), t);
-    for (var ec : c.getEnumConstants()) {
-      tse.enumValues.add(ec.toString());
+  /**
+   * Creates an empty {@link RvType} node for the given type. The node is
+   * registered in the cache before its properties are populated, so that
+   * self-referential or mutually-referential DTO graphs resolve to the same
+   * node instead of recursing indefinitely.
+   */
+  private RvType create(Type t) {
+    if (t instanceof TypeVariable) {
+      return new RvType(null, null, t);
+    } else if (t instanceof Class) {
+      var c = (Class<?>) t;
+      if (c.isEnum()) {
+        return new RvType("const enum", c.getSimpleName(), t);
+      }
+      if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c) || isCollection(c) || c.isArray()) {
+        var tc = new RvType(null, null, t);
+        tc.declaration = "interface";
+        return tc;
+      }
+      return new RvType("interface", c.getSimpleName(), t);
+    } else if (t instanceof ParameterizedType) {
+      var c = (Class<?>) ((ParameterizedType) t).getRawType();
+      if (c.isEnum()) {
+        return new RvType("const enum", c.getSimpleName(), t);
+      }
+      return new RvType("interface", c.getSimpleName(), t);
     }
-    return tse;
+    throw new IllegalStateException(
+      format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
+    );
   }
 
-  private RvType mapClass(Class<?> c, Type t, ParameterizedType pt) {
-    var ts = new RvType("interface", c.getSimpleName(), t);
+  private void populate(Type t, RvType rt) {
+    if (t instanceof Class) {
+      var c = (Class<?>) t;
+      if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c) || isCollection(c)) {
+        return;
+      }
+      if (c.isArray()) {
+        get(c.getComponentType());
+        return;
+      }
+      if (c.isEnum()) {
+        for (var ec : c.getEnumConstants()) {
+          rt.enumValues.add(ec.toString());
+        }
+        return;
+      }
+      mapClass(c, rt, null);
+    } else if (t instanceof ParameterizedType) {
+      var pt = (ParameterizedType) t;
+      mapClass((Class<?>) pt.getRawType(), rt, pt);
+    }
+  }
+
+  private void mapClass(Class<?> c, RvType ts, ParameterizedType pt) {
     for (var f : c.getFields()) {
       if (f.getDeclaringClass() == c && !Modifier.isTransient(f.getModifiers())) {
-        var fts = get(f.getGenericType());
-        ts.properties.put(f.getName(), fts);
+        ts.properties.put(f.getName(), get(f.getGenericType()));
       }
     }
     if (pt != null) {
@@ -109,38 +155,17 @@ public class RvTypeCache {
       }
     }
     superClass(c).ifPresent(st -> ts.extendz = get(st));
-    return ts;
-  }
-
-  private RvType map(Type t) {
-    if (t instanceof TypeVariable) {
-      return new RvType(null, null, t);
-    } else if (t instanceof Class) {
-      var c = (Class<?>) t;
-      if (isPrimitiveOrWrapper(c) || isVoid(c) || isString(c) || isCollection(c) || c.isArray()) {
-        var tc = new RvType(null, null, t);
-        tc.declaration = "interface";
-        return tc;
-      } else if (c.isEnum()) {
-        return mapEnum(c, t);
-      } else {
-        return mapClass(c, t, null);
-      }
-    } else if (t instanceof ParameterizedType) {
-      var pt = (ParameterizedType) t;
-      return mapClass((Class<?>) pt.getRawType(), t, pt);
-    }
-    throw new IllegalStateException(
-      format("Unable to map type [%s], please file a bug at https://github.com/vaccovecrana/ronove/issues", t)
-    );
   }
 
   public RvType get(Type t) {
-    if (idx.containsKey(t.getTypeName())) {
-      return idx.get(t.getTypeName());
+    var key = t.getTypeName();
+    var existing = idx.get(key);
+    if (existing != null) {
+      return existing;
     }
-    var rt = map(t);
-    idx.put(t.getTypeName(), rt);
+    var rt = create(t);
+    idx.put(key, rt);
+    populate(t, rt);
     return rt;
   }
 

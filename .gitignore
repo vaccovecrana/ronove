@@ -6,4 +6,5 @@ gradlew*
 
 bin/
 build/
+node_modules/
 .DS_Store

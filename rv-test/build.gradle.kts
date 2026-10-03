@@ -1,4 +1,26 @@
+import com.github.gradle.node.NodeExtension
+import com.github.gradle.node.npm.task.NpmTask
+
+plugins {
+  id("com.github.node-gradle.node") version "7.1.0"
+}
+
 configure<io.vacco.oss.gitflow.GsPluginProfileExtension> { sharedLibrary(false, false) }
+
+configure<NodeExtension> {
+  download.set(true)
+  version.set("22.17.0")
+}
+
+tasks.register<NpmTask>("typescriptVerify") {
+  group = "verification"
+  description = "Type-checks the generated TypeScript RPC clients with tsc"
+  dependsOn(tasks.named("test"))
+  dependsOn(tasks.named("npmInstall"))
+  args.set(listOf("run", "typecheck"))
+}
+
+tasks.named("check") { dependsOn("typescriptVerify") }
 
 tasks.withType<JacocoReport> {
   sourceSets(

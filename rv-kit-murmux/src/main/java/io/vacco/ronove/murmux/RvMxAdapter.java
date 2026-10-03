@@ -16,15 +16,15 @@ import java.util.function.BiConsumer;
 
 import static io.vacco.murmux.http.MxExchanges.HContentType;
 
-public class RvMxAdapter<Api> extends RvAdapter<Api, MxHandler, MxExchange> {
+public class RvMxAdapter extends RvAdapter<MxHandler, MxExchange> {
 
   private final RvJsonInput jIn;
   private final RvJsonOutput jOut;
   private final MxRouter router = new MxRouter();
 
-  public RvMxAdapter(Api api, BiConsumer<MxExchange, Exception> errorHandler,
+  public RvMxAdapter(BiConsumer<MxExchange, Exception> errorHandler,
                      RvJsonInput jIn, RvJsonOutput jOut) {
-    super(api, errorHandler);
+    super(errorHandler);
     this.jIn = Objects.requireNonNull(jIn);
     this.jOut = Objects.requireNonNull(jOut);
   }

@@ -1,15 +1,12 @@
 package io.vacco.ronove.plugin;
 
 import io.vacco.ronove.reflect.RvContext;
-import io.vacco.ronove.reflect.RvTypes;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
 import java.io.File;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -68,13 +65,7 @@ public class RvGraalGen {
   }
 
   public void render(RvContext ctx, File rcJsonOutFile, File rmJsonOutFile) {
-    var types = ctx.schemaTypes().stream().map(rvt -> {
-      if (rvt.from instanceof ParameterizedType) {
-        var pt = (ParameterizedType) rvt.from;
-        return pt.getRawType();
-      }
-      return rvt.from;
-    }).toList();
+    var types = ctx.metadataTypes();
     if (rcJsonOutFile != null) {
       RvTask.write(reflectConfig(types), rcJsonOutFile);
     }

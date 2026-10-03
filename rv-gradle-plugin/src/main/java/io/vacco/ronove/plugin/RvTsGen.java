@@ -26,7 +26,7 @@ public class RvTsGen {
     for (var rvd : ctx.paths.values()) {
       if (void.class.equals(rvd.responseType.from) || Void.class.equals(rvd.responseType.from)) {
         log.warn("RPC method [{}] returns void. This generates Promise<void> which may cause " +
-          "runtime issues in TypeScript clients. Consider returning RvResponse<Void> instead.",
+            "runtime issues in TypeScript clients. Consider returning RvResponse<Void> instead.",
           rvd.javaMethod.getName());
       }
     }
@@ -36,7 +36,7 @@ public class RvTsGen {
     context.set("rvDescriptors", ctx.paths.values());
     context.set("tsSchemaTypes", types);
     context.set("retFn", (Function<Type, String>) ctx.typeCache::nameReturn);
-    context.set("nameGenericRaw", (Function <Type, String>) ctx.typeCache::nameGenericRaw);
+    context.set("nameGenericRaw", (Function<Type, String>) ctx.typeCache::nameGenericRaw);
     context.set("paramFn", (Function<RvMethod, String>) ctx.typeCache::nameParams);
     context.set("optionalFields", optionalFields);
 

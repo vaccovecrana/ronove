@@ -83,6 +83,7 @@ public class RvRequestRunner {
         ofString()
       )
     );
+    checkResOk(client.send(GET("/v1/edge/array"), ofString()));
   }
 
   public static void go() throws IOException, InterruptedException {

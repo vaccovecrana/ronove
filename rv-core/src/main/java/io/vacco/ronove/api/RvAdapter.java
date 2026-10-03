@@ -1,28 +1,28 @@
 package io.vacco.ronove.api;
 
-import io.vacco.ronove.reflect.*;
+import io.vacco.ronove.reflect.RvContext;
+import io.vacco.ronove.reflect.RvMethod;
+import io.vacco.ronove.reflect.RvParameter;
+import io.vacco.ronove.reflect.RvTypes;
 import io.vacco.ronove.util.RvResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 /**
  * Base class for implementing HTTP server adapters.
  *
- * @param <Api> a target API class to wrap.
  * @param <Hdl> the underlying HTTP request/response handler implementation.
  * @param <Xc>  the underlying HTTP request/response exchange implementation.
  */
-public abstract class RvAdapter<Api, Hdl, Xc> {
+public abstract class RvAdapter<Hdl, Xc> {
 
-  public final Api api;
   public final BiConsumer<Xc, Exception> errorHandler;
 
-  public RvAdapter(Api api, BiConsumer<Xc, Exception> errorHandler) {
+  public RvAdapter(BiConsumer<Xc, Exception> errorHandler) {
     this.errorHandler = Objects.requireNonNull(errorHandler);
-    this.api = Objects.requireNonNull(api);
   }
 
   public abstract String loadPath(RvParameter pp, Xc xc);
@@ -62,13 +62,30 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
    */
   public abstract void commitResponse(RvResponse<?> res, Xc xc) throws Exception;
 
-  public Hdl build() {
-    var idx = new RvContext().describe(api.getClass());
-    return combine(
-      idx.values().stream()
-        .map(this::link)
-        .collect(Collectors.toList())
-    );
+  /**
+   * Binds every handler method of the given controller instances into a single
+   * combined handler. Each controller instance is invoked for its own methods.
+   * Passing a single instance is the common case.
+   *
+   * @param controllers one or more controller instances.
+   * @return the combined handler.
+   */
+  public Hdl build(Object... controllers) {
+    Objects.requireNonNull(controllers);
+    var classes = new ArrayList<Class<?>>(controllers.length);
+    for (var c : controllers) {
+      classes.add(Objects.requireNonNull(c, "controller instance").getClass());
+    }
+    var ctx = new RvContext();
+    ctx.describe(classes);
+    var handlers = new ArrayList<RvHandler<Xc>>();
+    for (var i = 0; i < controllers.length; i++) {
+      var instance = controllers[i];
+      for (var rvd : ctx.controllers.get(i).methods.values()) {
+        handlers.add(link(instance, rvd));
+      }
+    }
+    return combine(handlers);
   }
 
   private Object valueOrDefault(RvParameter p, String rawValue) {
@@ -84,7 +101,7 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
     return null;
   }
 
-  public RvHandler<Xc> link(RvMethod rvd) {
+  public RvHandler<Xc> link(Object instance, RvMethod rvd) {
     var params = new Object[rvd.allParams.size()];
     return new RvHandler<Xc>()
       .withDescriptor(rvd)
@@ -111,7 +128,7 @@ public abstract class RvAdapter<Api, Hdl, Xc> {
           if (rvd.beanParam != null) {
             params[rvd.beanParam.position] = loadBean(rvd.beanParam, xc);
           }
-          var out = rvd.javaMethod.invoke(api, params);
+          var out = rvd.javaMethod.invoke(instance, params);
           if (out instanceof RvResponse) {
             var res = ((RvResponse<?>) out).validate();
             if (rvd.produces != null) {

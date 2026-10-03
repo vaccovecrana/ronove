@@ -1,0 +1,12 @@
+{
+  "name": "ronove-rv-test-ts",
+  "version": "4.0.0",
+  "private": true,
+  "description": "TypeScript verification for ronove generated RPC clients",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
